@@ -1,16 +1,13 @@
 import React from 'react';
 import { useBudget } from '../context/BudgetContext';
+import { useLanguage } from '../context/LanguageContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { DollarSign, TrendingUp, TrendingDown, Target } from 'lucide-react';
 
 function BudgetOverview() {
   const { budget, totalIncome, totalExpenses, balance, budgetRemaining } = useBudget();
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(amount);
-  };
+  const { t } = useLanguage();
+  const { formatCurrency } = useCurrency();
 
   const getBalanceColor = (amount) => {
     if (amount > 0) return 'text-success-600';
@@ -19,6 +16,7 @@ function BudgetOverview() {
   };
 
   const getBudgetColor = (remaining, total) => {
+    if (total === 0) return 'text-gray-600';
     const percentage = (remaining / total) * 100;
     if (percentage > 50) return 'text-success-600';
     if (percentage > 20) return 'text-yellow-600';
@@ -32,7 +30,7 @@ function BudgetOverview() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-primary-100 text-sm font-medium">
-              Presupuesto Mensual
+              {t('monthlyBudget')}
             </p>
             <p className="text-2xl font-bold">
               {formatCurrency(budget)}
@@ -49,7 +47,7 @@ function BudgetOverview() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-success-100 text-sm font-medium">
-              Ingresos Totales
+              {t('totalIncome')}
             </p>
             <p className="text-2xl font-bold">
               {formatCurrency(totalIncome)}
@@ -66,7 +64,7 @@ function BudgetOverview() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-danger-100 text-sm font-medium">
-              Gastos Totales
+              {t('totalExpenses')}
             </p>
             <p className="text-2xl font-bold">
               {formatCurrency(totalExpenses)}
@@ -83,7 +81,7 @@ function BudgetOverview() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-gray-600 text-sm font-medium">
-              Balance Total
+              {t('totalBalance')}
             </p>
             <p className={`text-2xl font-bold ${getBalanceColor(balance)}`}>
               {formatCurrency(balance)}
@@ -101,24 +99,24 @@ function BudgetOverview() {
           <div className="card">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                Estado del Presupuesto
+                {t('budgetStatus')}
               </h3>
               <span className={`text-sm font-medium ${getBudgetColor(budgetRemaining, budget)}`}>
-                {budgetRemaining >= 0 ? 'Dentro del presupuesto' : 'Presupuesto excedido'}
+                {budgetRemaining >= 0 ? t('withinBudget') : t('budgetExceeded')}
               </span>
             </div>
             
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Gastado</span>
+                <span className="text-gray-600">{t('spent')}</span>
                 <span className="font-medium">{formatCurrency(totalExpenses)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Presupuesto</span>
+                <span className="text-gray-600">{t('budget')}</span>
                 <span className="font-medium">{formatCurrency(budget)}</span>
               </div>
               <div className="flex justify-between text-sm font-semibold">
-                <span className={getBalanceColor(budgetRemaining)}>Restante</span>
+                <span className={getBalanceColor(budgetRemaining)}>{t('remaining')}</span>
                 <span className={getBalanceColor(budgetRemaining)}>
                   {formatCurrency(budgetRemaining)}
                 </span>

@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { useBudget } from '../context/BudgetContext';
+import { useLanguage } from '../context/LanguageContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { X, DollarSign } from 'lucide-react';
 
 function BudgetForm({ onClose }) {
   const { budget, setBudget } = useBudget();
+  const { t } = useLanguage();
+  const { getCurrencySymbol } = useCurrency();
   const [amount, setAmount] = useState(budget || '');
   const [errors, setErrors] = useState({});
 
@@ -31,7 +35,7 @@ function BudgetForm({ onClose }) {
     <div className="card max-w-md mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-gray-900">
-          Configurar Presupuesto
+          {t('configureBudget')}
         </h2>
         <button
           onClick={onClose}
@@ -44,11 +48,11 @@ function BudgetForm({ onClose }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-2">
-            Presupuesto Mensual
+            {t('monthlyBudget')}
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <DollarSign className="h-5 w-5 text-gray-400" />
+              <span className="text-gray-400">{getCurrencySymbol()}</span>
             </div>
             <input
               type="number"
@@ -82,13 +86,13 @@ function BudgetForm({ onClose }) {
             onClick={onClose}
             className="btn-secondary flex-1"
           >
-            Cancelar
+            {t('cancel')}
           </button>
           <button
             type="submit"
             className="btn-primary flex-1"
           >
-            {budget > 0 ? 'Actualizar' : 'Establecer'} Presupuesto
+            {budget > 0 ? 'Actualizar' : 'Establecer'} {t('budget')}
           </button>
         </div>
       </form>
