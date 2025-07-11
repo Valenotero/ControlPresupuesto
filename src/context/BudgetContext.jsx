@@ -8,7 +8,6 @@ import {
   getDocs,
   query,
   where,
-  orderBy,
   setDoc,
   getDoc
 } from 'firebase/firestore';
@@ -98,12 +97,11 @@ export function BudgetProvider({ children }) {
         dispatch({ type: 'SET_BUDGET', payload: budgetSnap.data().amount || 0 });
       }
 
-      // Cargar transacciones
+      // Cargar transacciones (sin orderBy para evitar requerir índice)
       const transactionsRef = collection(db, 'transactions');
       const q = query(
         transactionsRef,
-        where('userId', '==', currentUser.uid),
-        orderBy('date', 'desc')
+        where('userId', '==', currentUser.uid)
       );
 
       const querySnapshot = await getDocs(q);
@@ -111,6 +109,9 @@ export function BudgetProvider({ children }) {
       querySnapshot.forEach((doc) => {
         transactions.push({ id: doc.id, ...doc.data() });
       });
+
+      // Ordenar en JavaScript por fecha (más reciente primero)
+      transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
       dispatch({ type: 'SET_TRANSACTIONS', payload: transactions });
     } catch (error) {

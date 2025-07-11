@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import { X, Globe, DollarSign } from 'lucide-react';
 
 function PreferencesModal({ isOpen, onClose }) {
+  const { updateUserPreferences } = useAuth();
   const { t, currentLanguage, changeLanguage, availableLanguages } = useLanguage();
   const { currentCurrency, changeCurrency, availableCurrencies } = useCurrency();
   const [tempLanguage, setTempLanguage] = useState(currentLanguage);
@@ -11,13 +13,27 @@ function PreferencesModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    // Cambiar preferencias locales
     if (tempLanguage !== currentLanguage) {
       changeLanguage(tempLanguage);
     }
     if (tempCurrency !== currentCurrency) {
       changeCurrency(tempCurrency);
     }
+    
+    // Sincronizar con Firebase si hay cambios
+    if (tempLanguage !== currentLanguage || tempCurrency !== currentCurrency) {
+      try {
+        await updateUserPreferences({
+          language: tempLanguage,
+          currency: tempCurrency
+        });
+      } catch (error) {
+        console.error('Error syncing preferences:', error);
+      }
+    }
+    
     onClose();
   };
 

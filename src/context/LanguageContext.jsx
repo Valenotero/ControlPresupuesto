@@ -1,5 +1,4 @@
-import React, { createContext, useContext } from 'react';
-import { useAuth } from './AuthContext';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const LanguageContext = createContext();
 
@@ -199,15 +198,20 @@ const translations = {
 };
 
 export function LanguageProvider({ children }) {
-  const { userPreferences, updateUserPreferences } = useAuth();
-  const currentLanguage = userPreferences?.language || 'es';
+  const [currentLanguage, setCurrentLanguage] = useState(() => {
+    // Inicializar desde localStorage o usar 'es' por defecto
+    return localStorage.getItem('preferred-language') || 'es';
+  });
 
   const t = (key) => {
     return translations[currentLanguage]?.[key] || key;
   };
 
   const changeLanguage = (newLanguage) => {
-    updateUserPreferences({ language: newLanguage });
+    if (['es', 'en'].includes(newLanguage)) {
+      setCurrentLanguage(newLanguage);
+      localStorage.setItem('preferred-language', newLanguage);
+    }
   };
 
   const value = {

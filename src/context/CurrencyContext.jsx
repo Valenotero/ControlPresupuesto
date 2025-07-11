@@ -1,5 +1,4 @@
-import React, { createContext, useContext } from 'react';
-import { useAuth } from './AuthContext';
+import React, { createContext, useContext, useState } from 'react';
 
 const CurrencyContext = createContext();
 
@@ -30,8 +29,11 @@ const currencies = {
 };
 
 export function CurrencyProvider({ children }) {
-  const { userPreferences, updateUserPreferences } = useAuth();
-  const currentCurrency = userPreferences?.currency || 'EUR';
+  const [currentCurrency, setCurrentCurrency] = useState(() => {
+    // Inicializar desde localStorage o usar 'EUR' por defecto
+    const saved = localStorage.getItem('preferred-currency');
+    return (saved && currencies[saved]) ? saved : 'EUR';
+  });
 
   const formatCurrency = (amount) => {
     const currency = currencies[currentCurrency];
@@ -52,7 +54,8 @@ export function CurrencyProvider({ children }) {
 
   const changeCurrency = (newCurrency) => {
     if (currencies[newCurrency]) {
-      updateUserPreferences({ currency: newCurrency });
+      setCurrentCurrency(newCurrency);
+      localStorage.setItem('preferred-currency', newCurrency);
     }
   };
 
