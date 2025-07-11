@@ -107,13 +107,21 @@ export function BudgetProvider({ children }) {
       const querySnapshot = await getDocs(q);
       const transactions = [];
       querySnapshot.forEach((doc) => {
-        const transactionData = { id: doc.id, ...doc.data() };
+        // Usar SOLO el ID de Firebase, eliminar cualquier ID duplicado de los datos
+        const docData = doc.data();
+        delete docData.id; // Eliminar cualquier ID de los datos para evitar conflictos
         
-        // Debug: Mostrar información del documento
+        const transactionData = { 
+          id: doc.id, // ID de Firebase como único identificador
+          ...docData 
+        };
+        
+        // Debug mejorado
         console.log('📄 Documento cargado:', {
-          firestoreDocId: doc.id,
-          dataId: doc.data().id,
-          description: doc.data().description
+          firestoreId: doc.id,
+          description: docData.description,
+          type: docData.type,
+          amount: docData.amount
         });
         
         transactions.push(transactionData);
@@ -156,27 +164,38 @@ export function BudgetProvider({ children }) {
     if (!currentUser) return;
 
     try {
-      // No incluir ID generado localmente, usar solo el de Firebase
+      // Crear transacción sin ID local - Firebase generará el ID único
       const newTransaction = {
         ...transaction,
         userId: currentUser.uid,
         date: new Date().toISOString()
-        // Removido: id: uuidv4() - Firebase generará su propio ID
       };
+
+      // Eliminar cualquier ID local que pueda venir en la transacción
+      delete newTransaction.id;
+
+      console.log('📝 Agregando nueva transacción:', {
+        description: newTransaction.description,
+        amount: newTransaction.amount,
+        type: newTransaction.type,
+        userId: newTransaction.userId
+      });
 
       const transactionsRef = collection(db, 'transactions');
       const docRef = await addDoc(transactionsRef, newTransaction);
 
-      // Usar únicamente el ID de Firebase
+      // Usar ÚNICAMENTE el ID de Firebase
       const transactionWithFirebaseId = {
         ...newTransaction,
-        id: docRef.id
+        id: docRef.id // ID de Firebase como único identificador
       };
 
+      console.log('✅ Transacción agregada con ID de Firebase:', docRef.id);
+      
       dispatch({ type: 'ADD_TRANSACTION', payload: transactionWithFirebaseId });
       toast.success(t('transactionAdded'));
     } catch (error) {
-      console.error('Error adding transaction:', error);
+      console.error('❌ Error agregando transacción:', error);
       toast.error(t('errorAddingTransaction'));
     }
   };
@@ -184,72 +203,98 @@ export function BudgetProvider({ children }) {
   const deleteTransaction = async (id) => {
     if (!currentUser) return;
 
-    // Debug logging para identificar problemas
-    console.log('🗑️ Intentando eliminar transacción con ID:', id);
+    // Debug logging mejorado
+    console.log('🗑️ === INICIO ELIMINAR TRANSACCIÓN ===');
+    console.log('🆔 ID recibido:', id, 'Tipo:', typeof id);
     console.log('👤 Usuario actual:', currentUser.uid);
+    
+    // Verificar transacciones actuales en estado
+    console.log('📊 Transacciones en estado local:');
+    state.transactions.forEach((t, index) => {
+      console.log(`  ${index}: ID="${t.id}" (${typeof t.id}) - ${t.description}`);
+    });
 
     try {
-      // Verificar que el ID existe antes de eliminar
-      if (!id) {
+      // Verificar que el ID es válido
+      if (!id || id.trim() === '') {
         console.error('❌ ID de transacción no válido:', id);
         toast.error('Error: ID de transacción no válido');
         return;
       }
 
-      // Intentar obtener el documento primero para verificar permisos
-      const docRef = doc(db, 'transactions', id);
+      // Crear referencia del documento
+      const docRef = doc(db, 'transactions', id.toString().trim());
       console.log('📄 Referencia del documento:', docRef.path);
+      console.log('🆔 ID procesado:', id.toString().trim());
       
-      // Verificar si el documento existe y tenemos permisos
-      try {
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          console.log('📋 Datos del documento a eliminar:', {
-            userId: data.userId,
-            currentUserId: currentUser.uid,
-            description: data.description,
-            canDelete: data.userId === currentUser.uid
-          });
-          
-          if (data.userId !== currentUser.uid) {
-            throw new Error('No tienes permisos para eliminar esta transacción');
-          }
-        } else {
-          throw new Error('El documento no existe');
+      // Verificar si el documento existe
+      console.log('🔍 Verificando si el documento existe...');
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        console.error('❌ El documento no existe en Firebase');
+        
+        // Verificar si existe en el estado local pero no en Firebase
+        const localTransaction = state.transactions.find(t => t.id === id);
+        if (localTransaction) {
+          console.log('🔄 Transacción existe localmente pero no en Firebase, eliminando del estado local...');
+          dispatch({ type: 'DELETE_TRANSACTION', payload: id });
+          toast.success(t('transactionDeleted'));
+          return;
         }
-      } catch (readError) {
-        console.error('❌ Error leyendo documento antes de eliminar:', readError);
-        throw readError;
+        
+        throw new Error('La transacción no existe');
       }
 
-      console.log('🔥 Intentando eliminar de Firebase...');
-      await deleteDoc(docRef);
-      console.log('✅ Transacción eliminada de Firebase:', id);
+      const data = docSnap.data();
+      console.log('📋 Datos del documento encontrado:', {
+        userId: data.userId,
+        currentUserId: currentUser.uid,
+        description: data.description,
+        canDelete: data.userId === currentUser.uid
+      });
       
+      // Verificar permisos
+      if (data.userId !== currentUser.uid) {
+        throw new Error('No tienes permisos para eliminar esta transacción');
+      }
+
+      console.log('🔥 Eliminando de Firebase...');
+      await deleteDoc(docRef);
+      console.log('✅ Eliminado de Firebase exitosamente');
+      
+      // Eliminar del estado local
       dispatch({ type: 'DELETE_TRANSACTION', payload: id });
-      console.log('✅ Transacción eliminada del estado local:', id);
+      console.log('✅ Eliminado del estado local exitosamente');
       
       toast.success(t('transactionDeleted'));
+      console.log('🎉 === ELIMINAR TRANSACCIÓN COMPLETADO ===');
+      
     } catch (error) {
-      console.error('❌ Error eliminando transacción:', error);
-      console.error('🔍 Detalles del error:');
+      console.error('❌ === ERROR ELIMINANDO TRANSACCIÓN ===');
+      console.error('🔍 Detalles completos del error:');
+      console.error('- Tipo:', error.constructor.name);
       console.error('- Código:', error.code);
       console.error('- Mensaje:', error.message);
-      console.error('- ID que causó el error:', id);
+      console.error('- Stack:', error.stack);
+      console.error('- ID problemático:', id);
       console.error('- Usuario actual:', currentUser?.uid);
       
-      // Mostrar error específico al usuario
+      // Mensaje de error específico
       let errorMessage = t('errorDeletingTransaction');
-      if (error.code === 'permission-denied') {
+      
+      if (error.message.includes('no existe')) {
+        errorMessage = 'Error: La transacción ya no existe';
+      } else if (error.code === 'permission-denied') {
         errorMessage = 'Error: No tienes permisos para eliminar esta transacción';
       } else if (error.code === 'not-found') {
-        errorMessage = 'Error: La transacción no existe';
+        errorMessage = 'Error: La transacción no fue encontrada en la base de datos';
       } else {
         errorMessage += ': ' + error.message;
       }
       
       toast.error(errorMessage);
+      console.log('❌ === FIN ERROR ELIMINAR TRANSACCIÓN ===');
     }
   };
 
