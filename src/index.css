@@ -3,33 +3,474 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    @apply scroll-smooth;
+  }
+  
   body {
-    @apply bg-gray-50 font-sans antialiased;
+    @apply bg-gray-50 font-sans antialiased text-gray-900;
+    /* Optimización para iOS Safari */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Responsive typography */
+  h1 {
+    @apply text-xl sm:text-2xl lg:text-3xl font-bold;
+  }
+  
+  h2 {
+    @apply text-lg sm:text-xl lg:text-2xl font-semibold;
+  }
+  
+  h3 {
+    @apply text-base sm:text-lg lg:text-xl font-semibold;
+  }
+  
+  h4 {
+    @apply text-sm sm:text-base lg:text-lg font-medium;
+  }
+
+  /* Prevent text size adjustment on iOS */
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* Prevenir comportamientos no deseados en touch */
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
 @layer components {
+  /* Botones responsive mejorados */
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+    @apply bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white font-medium py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 shadow-sm hover:shadow-md;
+    /* Prevenir problemas en dispositivos táctiles */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+    @apply bg-white hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-medium py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg border border-gray-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 shadow-sm hover:shadow-md;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
 
   .btn-success {
-    @apply bg-success-600 hover:bg-success-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-success-500 focus:ring-offset-2;
+    @apply bg-success-600 hover:bg-success-700 active:bg-success-800 text-white font-medium py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-success-500 focus:ring-offset-2 shadow-sm hover:shadow-md;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
 
   .btn-danger {
-    @apply bg-danger-600 hover:bg-danger-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-danger-500 focus:ring-offset-2;
+    @apply bg-danger-600 hover:bg-danger-700 active:bg-danger-800 text-white font-medium py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-danger-500 focus:ring-offset-2 shadow-sm hover:shadow-md;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
 
+  /* Cards responsive */
   .card {
-    @apply bg-white rounded-xl shadow-lg border border-gray-200 p-6 transition-shadow duration-200 hover:shadow-xl;
+    @apply bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-lg border border-gray-200 p-4 sm:p-6 transition-all duration-200 hover:shadow-md sm:hover:shadow-xl;
   }
 
+  /* Input fields responsive */
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200;
+    @apply w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200 placeholder-gray-400;
   }
+
+  /* Container responsivo */
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Animaciones compatibles con Tailwind estándar */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-slide-down {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  /* Keyframes personalizados */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Mejoras para touch devices */
+  .btn-primary,
+  .btn-secondary,
+  .btn-success,
+  .btn-danger {
+    /* Área de toque mínima de 44px para accesibilidad */
+    @apply min-h-[44px];
+    touch-action: manipulation;
+    /* Prevenir doble tap zoom en iOS */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  /* Sticky positioning mejorado */
+  .sticky-header {
+    @apply sticky top-0 z-40 border-b border-gray-200;
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+
+  /* Grid responsivos comunes */
+  .grid-responsive-cards {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+  }
+
+  .grid-responsive-2col {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6;
+  }
+
+  /* Text utilities responsive */
+  .text-responsive-sm {
+    @apply text-xs sm:text-sm;
+  }
+
+  .text-responsive-base {
+    @apply text-sm sm:text-base;
+  }
+
+  .text-responsive-lg {
+    @apply text-base sm:text-lg;
+  }
+
+  .text-responsive-xl {
+    @apply text-lg sm:text-xl lg:text-2xl;
+  }
+
+  /* Spacing responsive */
+  .space-responsive {
+    @apply space-y-4 sm:space-y-6;
+  }
+
+  .gap-responsive {
+    @apply gap-3 sm:gap-4 lg:gap-6;
+  }
+
+  .p-responsive {
+    @apply p-3 sm:p-4 lg:p-6;
+  }
+
+  /* Loading state */
+  .loading-skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+
+  /* Focus visible para keyboard navigation */
+  .focus-visible-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2;
+  }
+
+  /* Utility para truncar texto en móvil */
+  .mobile-truncate {
+    @apply truncate sm:text-clip sm:whitespace-normal;
+  }
+
+  /* Scrollbar personalizado para webkit */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-gray-100 rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+}
+
+@layer utilities {
+  /* Safe area insets para dispositivos con notch */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Utilidades de tap highlighting para móvil */
+  .no-tap-highlight {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Prevent scroll when modal is open */
+  .overflow-hidden-mobile {
+    @apply overflow-hidden;
+    /* Prevent background scroll on iOS */
+    position: fixed;
+    width: 100%;
+  }
+
+  /* Responsive visibility utilities */
+  .mobile-only {
+    @apply block sm:hidden;
+  }
+
+  .desktop-only {
+    @apply hidden sm:block;
+  }
+
+  .tablet-up {
+    @apply hidden md:block;
+  }
+
+  /* Touch-friendly checkbox and radio buttons */
+  .touch-checkbox,
+  .touch-radio {
+    @apply w-5 h-5 sm:w-4 sm:h-4;
+  }
+
+  /* Improved mobile form styling */
+  .mobile-form-field {
+    @apply mb-4 sm:mb-6;
+  }
+
+  .mobile-form-label {
+    @apply block text-sm font-medium text-gray-700 mb-2 sm:mb-3;
+  }
+
+  /* Better error state for mobile */
+  .error-field {
+    @apply border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500;
+  }
+
+  .error-text {
+    @apply text-red-600 text-sm mt-1;
+  }
+
+  /* Success state */
+  .success-field {
+    @apply border-green-300 bg-green-50 focus:border-green-500 focus:ring-green-500;
+  }
+
+  /* Better modal responsive behavior */
+  .modal-content {
+    @apply w-full max-w-lg mx-4 sm:mx-auto;
+  }
+
+  .modal-backdrop {
+    @apply fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4;
+  }
+}
+
+/* Animaciones para mejoras de configuraciones */
+
+/* Animación de deslizamiento hacia abajo */
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.2s ease-out;
+}
+
+/* Animación de escala para modales */
+@keyframes scale-up {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-up {
+  animation: scale-up 0.3s ease-out;
+}
+
+/* Animación de entrada suave */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Animación de deslizamiento hacia arriba */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out;
+}
+
+/* Mejoras adicionales para dropdowns */
+.dropdown-enter {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+}
+
+.dropdown-enter-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: all 0.2s ease-out;
+}
+
+.dropdown-exit {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.dropdown-exit-active {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  transition: all 0.15s ease-in;
+}
+
+/* Hover effect para elementos del menú */
+.menu-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.menu-item:hover::before {
+  left: 100%;
+}
+
+/* Mejoras para botones de configuración */
+.settings-button {
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.settings-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.settings-button:active {
+  transform: translateY(0);
+  transition: transform 0.1s ease;
+}
+
+/* Efecto de ripple optimizado para clicks */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease-out, height 0.4s ease-out, opacity 0.4s ease-out;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ripple:active::after {
+  width: 200px;
+  height: 200px;
+  opacity: 1;
 }

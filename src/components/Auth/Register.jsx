@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { User, Mail, Lock, UserPlus, Eye, EyeOff } from 'lucide-react';
+import Loader from '../Loader';
 
 function Register({ onToggleMode }) {
   const { signup } = useAuth();
-  const { t } = useLanguage();
+  const { t, translateFirebaseError } = useLanguage();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -21,27 +22,27 @@ function Register({ onToggleMode }) {
     const newErrors = {};
     
     if (!formData.name.trim()) {
-      newErrors.name = 'El nombre es requerido';
+      newErrors.name = t('nameRequired');
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'El nombre debe tener al menos 2 caracteres';
+      newErrors.name = t('nameMinLength');
     }
     
     if (!formData.email.trim()) {
-      newErrors.email = 'El correo es requerido';
+      newErrors.email = t('emailRequired');
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Correo inválido';
+      newErrors.email = t('emailInvalid');
     }
     
     if (!formData.password) {
-      newErrors.password = 'La contraseña es requerida';
+      newErrors.password = t('passwordRequired');
     } else if (formData.password.length < 6) {
-      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+      newErrors.password = t('passwordMinLength');
     }
     
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Confirma tu contraseña';
+      newErrors.confirmPassword = t('confirmPasswordRequired');
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Las contraseñas no coinciden';
+      newErrors.confirmPassword = t('passwordsNoMatch');
     }
     
     setErrors(newErrors);
@@ -55,7 +56,11 @@ function Register({ onToggleMode }) {
     
     setLoading(true);
     try {
-      await signup(formData.email, formData.password, formData.name);
+      await signup(formData.email, formData.password, formData.name, {
+        success: t('accountCreated'),
+        error: t('errorCreatingAccount'),
+        translateFirebaseError: translateFirebaseError
+      });
     } catch (error) {
       // Error handling is done in AuthContext
     } finally {
@@ -70,18 +75,26 @@ function Register({ onToggleMode }) {
     }
   };
 
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mx-auto mb-4">
-            <UserPlus className="h-8 w-8 text-primary-600" />
+          <div className="flex items-center justify-center w-16 h-16 bg-white rounded-full mx-auto mb-4 shadow-sm border border-gray-200">
+            <img 
+              src="/logotipo.jpg" 
+              alt="Logo" 
+              className="h-12 w-12 rounded-full object-cover"
+            />
           </div>
           <h2 className="text-3xl font-bold text-gray-900">
             {t('register')}
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Crea tu cuenta para comenzar a gestionar tu presupuesto
+            {t('createAccountSubtitle')}
           </p>
         </div>
 
@@ -101,7 +114,7 @@ function Register({ onToggleMode }) {
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder="Tu nombre completo"
+                  placeholder={t('fullNamePlaceholder')}
                   className={`input-field pl-10 ${errors.name ? 'border-danger-500 focus:ring-danger-500' : ''}`}
                 />
               </div>
@@ -124,7 +137,7 @@ function Register({ onToggleMode }) {
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="tu@email.com"
+                  placeholder={t('emailPlaceholder')}
                   className={`input-field pl-10 ${errors.email ? 'border-danger-500 focus:ring-danger-500' : ''}`}
                 />
               </div>
@@ -147,7 +160,7 @@ function Register({ onToggleMode }) {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  placeholder="••••••••"
+                  placeholder={t('passwordPlaceholder')}
                   className={`input-field pl-10 pr-10 ${errors.password ? 'border-danger-500 focus:ring-danger-500' : ''}`}
                 />
                 <button
@@ -181,7 +194,7 @@ function Register({ onToggleMode }) {
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                  placeholder="••••••••"
+                  placeholder={t('confirmPasswordPlaceholder')}
                   className={`input-field pl-10 pr-10 ${errors.confirmPassword ? 'border-danger-500 focus:ring-danger-500' : ''}`}
                 />
                 <button
@@ -211,7 +224,7 @@ function Register({ onToggleMode }) {
               {loading ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creando cuenta...
+                  {t('creatingAccount')}
                 </div>
               ) : (
                 t('register')

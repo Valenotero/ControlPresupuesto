@@ -2,23 +2,25 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// DEBUG: Verificar variables de entorno
-console.log('🔥 Firebase Debug - Variables de entorno:');
-console.log('API_KEY:', import.meta.env.VITE_FIREBASE_API_KEY);
-console.log('AUTH_DOMAIN:', import.meta.env.VITE_FIREBASE_AUTH_DOMAIN);
-console.log('PROJECT_ID:', import.meta.env.VITE_FIREBASE_PROJECT_ID);
+// Verificar si las variables de entorno están definidas
+const hasFirebaseConfig = import.meta.env.VITE_FIREBASE_API_KEY && 
+                          import.meta.env.VITE_FIREBASE_AUTH_DOMAIN && 
+                          import.meta.env.VITE_FIREBASE_PROJECT_ID;
+
+if (!hasFirebaseConfig) {
+  console.warn('🔥 Firebase - Variables de entorno no encontradas. Usando configuración por defecto para desarrollo local.');
+  console.warn('📝 Para configurar Firebase, crea un archivo .env con las variables VITE_FIREBASE_*');
+}
 
 // Configuración de Firebase
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-api-key",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "control-presupuesto-demo.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "control-presupuesto-demo",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "control-presupuesto-demo.appspot.com",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "demo-project.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "demo-project.appspot.com",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef123456"
 };
-
-console.log('🔥 Firebase Config final:', firebaseConfig);
 
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);

@@ -2,141 +2,214 @@ import React from 'react';
 import { useBudget } from '../context/BudgetContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useCurrency } from '../context/CurrencyContext';
-import { DollarSign, TrendingUp, TrendingDown, Target } from 'lucide-react';
+import { TrendingUp, TrendingDown, Target, Wallet, AlertTriangle, CheckCircle, Plus } from 'lucide-react';
 
 function BudgetOverview() {
-  const { budget, totalIncome, totalExpenses, balance, budgetRemaining } = useBudget();
+  const { totalIncome, additionalIncome, totalExpenses, budget } = useBudget();
   const { t } = useLanguage();
-  const { formatCurrency } = useCurrency();
+  const { formatCurrency, formatCurrencyCompact } = useCurrency();
 
-  const getBalanceColor = (amount) => {
-    if (amount > 0) return 'text-success-600';
-    if (amount < 0) return 'text-danger-600';
-    return 'text-gray-600';
+  const balance = totalIncome - totalExpenses;
+  const budgetRemaining = totalIncome - totalExpenses;
+  const budgetPercentage = totalIncome > 0 ? (totalExpenses / totalIncome) * 100 : 0;
+
+  // Función para decidir qué formato usar
+  const smartFormatCurrency = (amount) => {
+    return Math.abs(amount) >= 1e6 ? formatCurrencyCompact(amount) : formatCurrency(amount);
   };
 
-  const getBudgetColor = (remaining, total) => {
-    if (total === 0) return 'text-gray-600';
-    const percentage = (remaining / total) * 100;
-    if (percentage > 50) return 'text-success-600';
-    if (percentage > 20) return 'text-yellow-600';
-    return 'text-danger-600';
+  const getBudgetStatus = () => {
+    if (budgetPercentage <= 70) {
+      return {
+        color: 'text-success-600',
+        bgColor: 'bg-success-100',
+        icon: CheckCircle,
+        message: t('withinBudget') || 'Dentro del presupuesto'
+      };
+    } else if (budgetPercentage <= 90) {
+      return {
+        color: 'text-warning-600',
+        bgColor: 'bg-warning-100',
+        icon: AlertTriangle,
+        message: 'Acercándose al límite'
+      };
+    } else {
+      return {
+        color: 'text-danger-600',
+        bgColor: 'bg-danger-100',
+        icon: AlertTriangle,
+        message: t('budgetExceeded') || 'Presupuesto excedido'
+      };
+    }
   };
+
+  const status = getBudgetStatus();
+  const StatusIcon = status.icon;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {/* Presupuesto Total */}
-      <div className="card bg-gradient-to-r from-primary-500 to-primary-600 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-primary-100 text-sm font-medium">
-              {t('monthlyBudget')}
-            </p>
-            <p className="text-2xl font-bold">
-              {formatCurrency(budget)}
-            </p>
+    <div className="px-2 sm:px-0">
+      {/* Grid responsive mejorado */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        {/* Tarjeta de Presupuesto Base */}
+        <div className="col-span-2 lg:col-span-1 card bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200">
+          <div className="flex items-center justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-primary-600 truncate">
+                {t('baseIncome')}
+              </p>
+              <p className="text-lg sm:text-2xl font-bold text-primary-900 truncate" title={formatCurrency(budget)}>
+                {smartFormatCurrency(budget)}
+              </p>
+            </div>
+            <div className="flex-shrink-0 ml-2">
+              <div className="p-2 sm:p-3 bg-primary-200 rounded-lg">
+                <Target className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />
+              </div>
+            </div>
           </div>
-          <div className="bg-primary-400 bg-opacity-50 p-3 rounded-full">
-            <Target className="h-6 w-6" />
+          {/* Información adicional */}
+          <div className="mt-3 flex items-center space-x-2">
+            <StatusIcon className={`h-4 w-4 ${status.color}`} />
+            <span className={`text-xs font-medium ${status.color} truncate`}>
+              {status.message}
+            </span>
+          </div>
+        </div>
+
+        {/* Tarjeta de Ingresos Totales (Base + Adicionales) */}
+        <div className="card bg-gradient-to-br from-success-50 to-success-100 border-success-200">
+          <div className="flex items-center justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-success-600 truncate">
+                {t('totalIncome')}
+              </p>
+              <p className="text-lg sm:text-2xl font-bold text-success-900 truncate" title={formatCurrency(totalIncome)}>
+                {smartFormatCurrency(totalIncome)}
+              </p>
+            </div>
+            <div className="flex-shrink-0 ml-2">
+              <div className="p-2 sm:p-3 bg-success-200 rounded-lg">
+                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-success-600" />
+              </div>
+            </div>
+          </div>
+          {/* Mostrar desglose si hay ingresos adicionales */}
+          {additionalIncome > 0 && (
+            <div className="mt-2 flex items-center space-x-1 text-xs text-success-700">
+              <Plus className="h-3 w-3" />
+              <span className="truncate">+{smartFormatCurrency(additionalIncome)} {t('extraText')}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Tarjeta de Gastos Totales */}
+        <div className="card bg-gradient-to-br from-danger-50 to-danger-100 border-danger-200">
+          <div className="flex items-center justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-danger-600 truncate">
+                {t('totalExpenses')}
+              </p>
+              <p className="text-lg sm:text-2xl font-bold text-danger-900 truncate" title={formatCurrency(totalExpenses)}>
+                {smartFormatCurrency(totalExpenses)}
+              </p>
+            </div>
+            <div className="flex-shrink-0 ml-2">
+              <div className="p-2 sm:p-3 bg-danger-200 rounded-lg">
+                <TrendingDown className="h-5 w-5 sm:h-6 sm:w-6 text-danger-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tarjeta de Balance */}
+        <div className={`card bg-gradient-to-br ${
+          balance >= 0 
+            ? 'from-indigo-50 to-indigo-100 border-indigo-200' 
+            : 'from-orange-50 to-orange-100 border-orange-200'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="min-w-0 flex-1">
+              <p className={`text-xs sm:text-sm font-medium ${
+                balance >= 0 ? 'text-indigo-600' : 'text-orange-600'
+              } truncate`}>
+                {t('totalBalance')}
+              </p>
+              <p className={`text-lg sm:text-2xl font-bold ${
+                balance >= 0 ? 'text-indigo-900' : 'text-orange-900'
+              } truncate`} title={formatCurrency(balance)}>
+                {smartFormatCurrency(balance)}
+              </p>
+            </div>
+            <div className="flex-shrink-0 ml-2">
+              <div className={`p-2 sm:p-3 rounded-lg ${
+                balance >= 0 ? 'bg-indigo-200' : 'bg-orange-200'
+              }`}>
+                <Wallet className={`h-5 w-5 sm:h-6 sm:w-6 ${
+                  balance >= 0 ? 'text-indigo-600' : 'text-orange-600'
+                }`} />
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Ingresos Totales */}
-      <div className="card bg-gradient-to-r from-success-500 to-success-600 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-success-100 text-sm font-medium">
-              {t('totalIncome')}
-            </p>
-            <p className="text-2xl font-bold">
-              {formatCurrency(totalIncome)}
-            </p>
-          </div>
-          <div className="bg-success-400 bg-opacity-50 p-3 rounded-full">
-            <TrendingUp className="h-6 w-6" />
-          </div>
-        </div>
-      </div>
-
-      {/* Gastos Totales */}
-      <div className="card bg-gradient-to-r from-danger-500 to-danger-600 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-danger-100 text-sm font-medium">
-              {t('totalExpenses')}
-            </p>
-            <p className="text-2xl font-bold">
-              {formatCurrency(totalExpenses)}
-            </p>
-          </div>
-          <div className="bg-danger-400 bg-opacity-50 p-3 rounded-full">
-            <TrendingDown className="h-6 w-6" />
-          </div>
-        </div>
-      </div>
-
-      {/* Balance */}
-      <div className="card">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-gray-600 text-sm font-medium">
-              {t('totalBalance')}
-            </p>
-            <p className={`text-2xl font-bold ${getBalanceColor(balance)}`}>
-              {formatCurrency(balance)}
-            </p>
-          </div>
-          <div className="bg-gray-100 p-3 rounded-full">
-            <DollarSign className="h-6 w-6 text-gray-600" />
-          </div>
-        </div>
-      </div>
-
-      {/* Presupuesto Restante */}
-      {budget > 0 && (
-        <div className="md:col-span-2 lg:col-span-4">
-          <div className="card">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t('budgetStatus')}
-              </h3>
-              <span className={`text-sm font-medium ${getBudgetColor(budgetRemaining, budget)}`}>
-                {budgetRemaining >= 0 ? t('withinBudget') : t('budgetExceeded')}
+      {/* Progreso del presupuesto - Mejorado para la nueva lógica */}
+      {totalIncome > 0 && (
+        <div className="mt-4 sm:mt-6 card">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4">
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-0">
+              {t('financialSummary')}
+            </h3>
+            <div className="flex items-center space-x-2">
+              <span className={`text-xs sm:text-sm font-medium px-2 py-1 rounded-full ${status.bgColor} ${status.color}`}>
+                {Math.round(budgetPercentage)}{t('percentSpent')}
               </span>
             </div>
-            
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">{t('spent')}</span>
-                <span className="font-medium">{formatCurrency(totalExpenses)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">{t('budget')}</span>
-                <span className="font-medium">{formatCurrency(budget)}</span>
-              </div>
-              <div className="flex justify-between text-sm font-semibold">
-                <span className={getBalanceColor(budgetRemaining)}>{t('remaining')}</span>
-                <span className={getBalanceColor(budgetRemaining)}>
-                  {formatCurrency(budgetRemaining)}
+          </div>
+
+          {/* Barra de progreso */}
+          <div className="relative">
+            <div className="overflow-hidden h-3 sm:h-4 text-xs flex rounded-full bg-gray-200">
+              <div
+                style={{ width: `${Math.min(budgetPercentage, 100)}%` }}
+                className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center transition-all duration-500 ${
+                  budgetPercentage <= 70 
+                    ? 'bg-success-500'
+                    : budgetPercentage <= 90 
+                    ? 'bg-warning-500' 
+                    : 'bg-danger-500'
+                }`}
+              ></div>
+            </div>
+          </div>
+
+          {/* Información detallada */}
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-600">{t('baseLabel')}</span>
+              <span className="font-medium text-gray-900 truncate" title={formatCurrency(budget)}>
+                {smartFormatCurrency(budget)}
+              </span>
+            </div>
+            {additionalIncome > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">{t('extraLabel')}</span>
+                <span className="font-medium text-success-600 truncate" title={formatCurrency(additionalIncome)}>
+                  {smartFormatCurrency(additionalIncome)}
                 </span>
               </div>
-              
-              {/* Barra de progreso */}
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    budgetRemaining >= 0 
-                      ? totalExpenses / budget > 0.8 
-                        ? 'bg-yellow-500' 
-                        : 'bg-success-500'
-                      : 'bg-danger-500'
-                  }`}
-                  style={{
-                    width: `${Math.min((totalExpenses / budget) * 100, 100)}%`,
-                  }}
-                ></div>
-              </div>
+            )}
+            <div className="flex justify-between">
+              <span className="text-gray-600">{t('spentLabel')}</span>
+              <span className="font-medium text-danger-600 truncate" title={formatCurrency(totalExpenses)}>
+                {smartFormatCurrency(totalExpenses)}
+              </span>
+            </div>
+            <div className="flex justify-between col-span-2 sm:col-span-1">
+              <span className="text-gray-600">{t('availableLabel')}</span>
+              <span className={`font-medium ${budgetRemaining >= 0 ? 'text-success-600' : 'text-danger-600'} truncate`} title={formatCurrency(budgetRemaining)}>
+                {smartFormatCurrency(budgetRemaining)}
+              </span>
             </div>
           </div>
         </div>

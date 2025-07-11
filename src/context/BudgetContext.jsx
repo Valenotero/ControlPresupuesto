@@ -107,16 +107,27 @@ export function BudgetProvider({ children }) {
       const querySnapshot = await getDocs(q);
       const transactions = [];
       querySnapshot.forEach((doc) => {
-        transactions.push({ id: doc.id, ...doc.data() });
+        const transactionData = { id: doc.id, ...doc.data() };
+        
+        // Debug: Mostrar información del documento
+        console.log('📄 Documento cargado:', {
+          firestoreDocId: doc.id,
+          dataId: doc.data().id,
+          description: doc.data().description
+        });
+        
+        transactions.push(transactionData);
       });
 
       // Ordenar en JavaScript por fecha (más reciente primero)
       transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
+      console.log('📊 Total transacciones cargadas:', transactions.length);
+      
       dispatch({ type: 'SET_TRANSACTIONS', payload: transactions });
     } catch (error) {
       console.error('Error loading user data:', error);
-      toast.error('Error al cargar los datos');
+      toast.error(t('errorLoadingData'));
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
@@ -134,10 +145,10 @@ export function BudgetProvider({ children }) {
       });
 
       dispatch({ type: 'SET_BUDGET', payload: amount });
-      toast.success('Presupuesto actualizado');
+      toast.success(t('budgetUpdated'));
     } catch (error) {
       console.error('Error updating budget:', error);
-      toast.error('Error al actualizar el presupuesto');
+      toast.error(t('errorUpdatingBudget'));
     }
   };
 
@@ -145,49 +156,108 @@ export function BudgetProvider({ children }) {
     if (!currentUser) return;
 
     try {
+      // No incluir ID generado localmente, usar solo el de Firebase
       const newTransaction = {
         ...transaction,
         userId: currentUser.uid,
-        date: new Date().toISOString(),
-        id: uuidv4()
+        date: new Date().toISOString()
+        // Removido: id: uuidv4() - Firebase generará su propio ID
       };
 
       const transactionsRef = collection(db, 'transactions');
       const docRef = await addDoc(transactionsRef, newTransaction);
 
+      // Usar únicamente el ID de Firebase
       const transactionWithFirebaseId = {
         ...newTransaction,
         id: docRef.id
       };
 
       dispatch({ type: 'ADD_TRANSACTION', payload: transactionWithFirebaseId });
-      toast.success(
-        transaction.type === 'income' ? 'Ingreso agregado' : 'Gasto agregado'
-      );
+      toast.success(t('transactionAdded'));
     } catch (error) {
       console.error('Error adding transaction:', error);
-      toast.error('Error al agregar la transacción');
+      toast.error(t('errorAddingTransaction'));
     }
   };
 
   const deleteTransaction = async (id) => {
     if (!currentUser) return;
 
+    // Debug logging para identificar problemas
+    console.log('🗑️ Intentando eliminar transacción con ID:', id);
+    console.log('👤 Usuario actual:', currentUser.uid);
+
     try {
-      await deleteDoc(doc(db, 'transactions', id));
+      // Verificar que el ID existe antes de eliminar
+      if (!id) {
+        console.error('❌ ID de transacción no válido:', id);
+        toast.error('Error: ID de transacción no válido');
+        return;
+      }
+
+      // Intentar obtener el documento primero para verificar permisos
+      const docRef = doc(db, 'transactions', id);
+      console.log('📄 Referencia del documento:', docRef.path);
+      
+      // Verificar si el documento existe y tenemos permisos
+      try {
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          console.log('📋 Datos del documento a eliminar:', {
+            userId: data.userId,
+            currentUserId: currentUser.uid,
+            description: data.description,
+            canDelete: data.userId === currentUser.uid
+          });
+          
+          if (data.userId !== currentUser.uid) {
+            throw new Error('No tienes permisos para eliminar esta transacción');
+          }
+        } else {
+          throw new Error('El documento no existe');
+        }
+      } catch (readError) {
+        console.error('❌ Error leyendo documento antes de eliminar:', readError);
+        throw readError;
+      }
+
+      console.log('🔥 Intentando eliminar de Firebase...');
+      await deleteDoc(docRef);
+      console.log('✅ Transacción eliminada de Firebase:', id);
+      
       dispatch({ type: 'DELETE_TRANSACTION', payload: id });
-      toast.success('Transacción eliminada');
+      console.log('✅ Transacción eliminada del estado local:', id);
+      
+      toast.success(t('transactionDeleted'));
     } catch (error) {
-      console.error('Error deleting transaction:', error);
-      toast.error('Error al eliminar la transacción');
+      console.error('❌ Error eliminando transacción:', error);
+      console.error('🔍 Detalles del error:');
+      console.error('- Código:', error.code);
+      console.error('- Mensaje:', error.message);
+      console.error('- ID que causó el error:', id);
+      console.error('- Usuario actual:', currentUser?.uid);
+      
+      // Mostrar error específico al usuario
+      let errorMessage = t('errorDeletingTransaction');
+      if (error.code === 'permission-denied') {
+        errorMessage = 'Error: No tienes permisos para eliminar esta transacción';
+      } else if (error.code === 'not-found') {
+        errorMessage = 'Error: La transacción no existe';
+      } else {
+        errorMessage += ': ' + error.message;
+      }
+      
+      toast.error(errorMessage);
     }
   };
 
   // Obtener categorías con traducciones actuales
   const categories = getDefaultCategories(t);
 
-  // Cálculos derivados
-  const totalIncome = state.transactions
+  // Cálculos derivados corregidos
+  const additionalIncome = state.transactions
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + t.amount, 0);
 
@@ -195,8 +265,11 @@ export function BudgetProvider({ children }) {
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
 
+  // LÓGICA CORREGIDA: Ingresos totales = Presupuesto (ingreso base) + Ingresos adicionales
+  const totalIncome = state.budget + additionalIncome;
+  
   const balance = totalIncome - totalExpenses;
-  const budgetRemaining = state.budget - totalExpenses;
+  const budgetRemaining = totalIncome - totalExpenses; // Ahora el "remaining" es del total de ingresos disponibles
 
   const value = {
     ...state,
@@ -206,6 +279,7 @@ export function BudgetProvider({ children }) {
     deleteTransaction,
     loadUserData,
     totalIncome,
+    additionalIncome, // Ingresos adicionales por separado
     totalExpenses,
     balance,
     budgetRemaining,

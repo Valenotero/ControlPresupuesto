@@ -1,202 +1,251 @@
 import React, { useState } from 'react';
 import { useBudget } from '../context/BudgetContext';
-import { X, DollarSign, Calendar, Tag } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { useCurrency } from '../context/CurrencyContext';
+import { Plus, FileText, Tag, DollarSign, X } from 'lucide-react';
 
 function TransactionForm({ onClose }) {
   const { addTransaction, categories } = useBudget();
+  const { t } = useLanguage();
+  const { currencySymbol, validateAmount } = useCurrency();
+  
   const [formData, setFormData] = useState({
     description: '',
     amount: '',
-    type: 'expense',
     category: '',
+    type: 'expense'
   });
+  
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-
-  const expenseCategories = categories.filter(cat => cat.type === 'expense');
-  const incomeCategories = categories.filter(cat => cat.type === 'income');
 
   const validateForm = () => {
     const newErrors = {};
     
+    // Validar descripción
     if (!formData.description.trim()) {
-      newErrors.description = 'La descripción es requerida';
+      newErrors.description = t('descriptionRequired');
     }
     
-    if (!formData.amount || formData.amount <= 0) {
-      newErrors.amount = 'El monto debe ser mayor a 0';
+    // Validar cantidad usando la función del contexto
+    const amountValidation = validateAmount(formData.amount);
+    if (!amountValidation.isValid) {
+      newErrors.amount = amountValidation.error;
+    } else if (amountValidation.value <= 0) {
+      newErrors.amount = t('amountRequired');
     }
     
+    // Validar categoría
     if (!formData.category) {
-      newErrors.category = 'Selecciona una categoría';
+      newErrors.category = t('categoryRequired');
     }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (validateForm()) {
-      addTransaction({
+    if (!validateForm()) return;
+    
+    setLoading(true);
+    try {
+      const amountValidation = validateAmount(formData.amount);
+      await addTransaction({
         ...formData,
-        amount: parseFloat(formData.amount),
+        amount: amountValidation.value,
+        date: new Date().toISOString()
       });
       onClose();
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value,
-      // Reset category when type changes
-      ...(field === 'type' && { category: '' })
+      [field]: value
     }));
     
-    // Clear error when user starts typing
+    // Limpiar errores cuando el usuario empiece a escribir
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
     }
   };
 
-  const availableCategories = formData.type === 'expense' ? expenseCategories : incomeCategories;
+  const handleAmountChange = (value) => {
+    // Limitar la entrada de números muy grandes
+    const numericValue = value.replace(/[^0-9.]/g, '');
+    
+    // Verificar que no exceda el límite máximo
+    if (numericValue && parseFloat(numericValue) > 1e12) {
+      setErrors(prev => ({
+        ...prev,
+        amount: `${t('numberTooLarge')} (${t('maxAmount')})`
+      }));
+      return;
+    }
+    
+    handleInputChange('amount', numericValue);
+  };
+
+  const filteredCategories = categories.filter(cat => cat.type === formData.type);
 
   return (
-    <div className="card max-w-md mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">
-          Nueva Transacción
-        </h2>
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          <X className="h-5 w-5" />
-        </button>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Tipo de transacción */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Tipo de Transacción
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => handleInputChange('type', 'expense')}
-              className={`p-3 rounded-lg border-2 text-sm font-medium transition-colors ${
-                formData.type === 'expense'
-                  ? 'border-danger-500 bg-danger-50 text-danger-700'
-                  : 'border-gray-200 hover:border-gray-300 text-gray-600'
-              }`}
-            >
-              💸 Gasto
-            </button>
-            <button
-              type="button"
-              onClick={() => handleInputChange('type', 'income')}
-              className={`p-3 rounded-lg border-2 text-sm font-medium transition-colors ${
-                formData.type === 'income'
-                  ? 'border-success-500 bg-success-50 text-success-700'
-                  : 'border-gray-200 hover:border-gray-300 text-gray-600'
-              }`}
-            >
-              💰 Ingreso
-            </button>
-          </div>
-        </div>
-
-        {/* Descripción */}
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-            Descripción
-          </label>
-          <input
-            type="text"
-            id="description"
-            value={formData.description}
-            onChange={(e) => handleInputChange('description', e.target.value)}
-            placeholder="Ej: Compra en supermercado"
-            className={`input-field ${errors.description ? 'border-danger-500 focus:ring-danger-500' : ''}`}
-          />
-          {errors.description && (
-            <p className="mt-1 text-sm text-danger-600">{errors.description}</p>
-          )}
-        </div>
-
-        {/* Monto */}
-        <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
-            Monto
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <DollarSign className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="number"
-              id="amount"
-              value={formData.amount}
-              onChange={(e) => handleInputChange('amount', e.target.value)}
-              placeholder="0.00"
-              step="0.01"
-              min="0"
-              className={`input-field pl-10 ${errors.amount ? 'border-danger-500 focus:ring-danger-500' : ''}`}
-            />
-          </div>
-          {errors.amount && (
-            <p className="mt-1 text-sm text-danger-600">{errors.amount}</p>
-          )}
-        </div>
-
-        {/* Categoría */}
-        <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-            Categoría
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Tag className="h-5 w-5 text-gray-400" />
-            </div>
-            <select
-              id="category"
-              value={formData.category}
-              onChange={(e) => handleInputChange('category', e.target.value)}
-              className={`input-field pl-10 ${errors.category ? 'border-danger-500 focus:ring-danger-500' : ''}`}
-            >
-              <option value="">Selecciona una categoría</option>
-              {availableCategories.map(category => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          {errors.category && (
-            <p className="mt-1 text-sm text-danger-600">{errors.category}</p>
-          )}
-        </div>
-
-        <div className="flex space-x-3 pt-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+            <Plus className="h-5 w-5 mr-2" />
+            {t('addNewTransaction')}
+          </h2>
           <button
-            type="button"
             onClick={onClose}
-            className="btn-secondary flex-1"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
           >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className={`flex-1 ${
-              formData.type === 'expense' ? 'btn-danger' : 'btn-success'
-            }`}
-          >
-            Agregar {formData.type === 'expense' ? 'Gasto' : 'Ingreso'}
+            <X className="h-6 w-6" />
           </button>
         </div>
-      </form>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Tipo de transacción */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              {t('transactionType')}
+            </label>
+            <div className="flex space-x-3">
+              <button
+                type="button"
+                onClick={() => handleInputChange('type', 'expense')}
+                className={`flex-1 py-2 px-4 border rounded-lg text-sm font-medium transition-colors ${
+                  formData.type === 'expense'
+                    ? 'bg-danger-100 border-danger-200 text-danger-800'
+                    : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {t('expense')}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleInputChange('type', 'income')}
+                className={`flex-1 py-2 px-4 border rounded-lg text-sm font-medium transition-colors ${
+                  formData.type === 'income'
+                    ? 'bg-success-100 border-success-200 text-success-800'
+                    : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {t('income')}
+              </button>
+            </div>
+          </div>
+
+          {/* Descripción */}
+          <div>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+              {t('description')}
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FileText className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                id="description"
+                type="text"
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                placeholder={t('transactionPlaceholder')}
+                className={`input-field pl-10 h-12 ${errors.description ? 'border-danger-500 focus:ring-danger-500' : ''}`}
+                maxLength={100}
+              />
+            </div>
+            {errors.description && (
+              <p className="mt-1 text-sm text-danger-600">{errors.description}</p>
+            )}
+          </div>
+
+          {/* Monto */}
+          <div>
+            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
+              {t('amount')}
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span className="text-gray-500 font-medium">{currencySymbol}</span>
+              </div>
+              <input
+                id="amount"
+                type="text"
+                inputMode="decimal"
+                value={formData.amount}
+                onChange={(e) => handleAmountChange(e.target.value)}
+                placeholder="0.00"
+                className={`input-field pl-10 h-12 text-lg ${errors.amount ? 'border-danger-500 focus:ring-danger-500' : ''}`}
+              />
+            </div>
+            {errors.amount && (
+              <p className="mt-1 text-sm text-danger-600">{errors.amount}</p>
+            )}
+            {formData.amount && parseFloat(formData.amount) >= 1e6 && (
+              <p className="mt-1 text-xs text-warning-600">
+                💡 {t('largeNumberDetected')} {currencySymbol}{(parseFloat(formData.amount) / 1e6).toFixed(1)}M
+              </p>
+            )}
+          </div>
+
+          {/* Categoría */}
+          <div>
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+              {t('category')}
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Tag className="h-5 w-5 text-gray-400" />
+              </div>
+              <select
+                id="category"
+                value={formData.category}
+                onChange={(e) => handleInputChange('category', e.target.value)}
+                className={`input-field pl-10 h-12 ${errors.category ? 'border-danger-500 focus:ring-danger-500' : ''}`}
+              >
+                <option value="">{t('selectCategory')}</option>
+                {filteredCategories.map(category => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {errors.category && (
+              <p className="mt-1 text-sm text-danger-600">{errors.category}</p>
+            )}
+          </div>
+
+          {/* Botones */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              {t('cancel')}
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
+            >
+              {loading ? t('saving') : t('add')}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

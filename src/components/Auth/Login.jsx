@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import Loader from '../Loader';
 
 function Login({ onToggleMode }) {
   const { login } = useAuth();
-  const { t } = useLanguage();
+  const { t, translateFirebaseError } = useLanguage();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -18,15 +19,15 @@ function Login({ onToggleMode }) {
     const newErrors = {};
     
     if (!formData.email.trim()) {
-      newErrors.email = 'El correo es requerido';
+      newErrors.email = t('emailRequired');
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Correo inválido';
+      newErrors.email = t('emailInvalid');
     }
     
     if (!formData.password) {
-      newErrors.password = 'La contraseña es requerida';
+      newErrors.password = t('passwordRequired');
     } else if (formData.password.length < 6) {
-      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+      newErrors.password = t('passwordMinLength');
     }
     
     setErrors(newErrors);
@@ -40,7 +41,11 @@ function Login({ onToggleMode }) {
     
     setLoading(true);
     try {
-      await login(formData.email, formData.password);
+      await login(formData.email, formData.password, {
+        success: t('welcomeBack'),
+        error: t('errorLoggingIn'),
+        translateFirebaseError: translateFirebaseError
+      });
     } catch (error) {
       // Error handling is done in AuthContext
     } finally {
@@ -55,12 +60,20 @@ function Login({ onToggleMode }) {
     }
   };
 
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mx-auto mb-4">
-            <LogIn className="h-8 w-8 text-primary-600" />
+          <div className="flex items-center justify-center w-16 h-16 bg-white rounded-full mx-auto mb-4 shadow-sm border border-gray-200">
+            <img 
+              src="/logotipo.jpg" 
+              alt="Logo" 
+              className="h-12 w-12 rounded-full object-cover"
+            />
           </div>
           <h2 className="text-3xl font-bold text-gray-900">
             {t('login')}
@@ -86,7 +99,7 @@ function Login({ onToggleMode }) {
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="tu@email.com"
+                  placeholder={t('emailPlaceholder')}
                   className={`input-field pl-10 ${errors.email ? 'border-danger-500 focus:ring-danger-500' : ''}`}
                 />
               </div>
@@ -109,7 +122,7 @@ function Login({ onToggleMode }) {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  placeholder="••••••••"
+                  placeholder={t('passwordPlaceholder')}
                   className={`input-field pl-10 pr-10 ${errors.password ? 'border-danger-500 focus:ring-danger-500' : ''}`}
                 />
                 <button
@@ -139,7 +152,7 @@ function Login({ onToggleMode }) {
               {loading ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Iniciando sesión...
+                  {t('loggingIn')}
                 </div>
               ) : (
                 t('login')
