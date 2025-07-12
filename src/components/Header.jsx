@@ -78,54 +78,6 @@ function Header() {
       };
     }
 
-    setTimeout(() => {
-      window.quickTest();
-      if (window.innerWidth < 1024) {
-        setTimeout(() => {
-          window.checkFooterSpacing();
-        }, 500);
-      }
-    }, 2000);
-
-    window.testLanguageChange = (langCode) => {
-      handleLanguageChange(langCode);
-    };
-
-    window.testCurrencyChange = (currencyCode) => {
-      handleCurrencyChange(currencyCode);
-    };
-
-    window.debugHeader = () => {
-      /* debugging header functions */
-    };
-
-    window.diagnoseNavbar = () => {
-      /* navbar diagnosis */
-    };
-
-    window.forceDesktop = () => {
-      setIsDesktop(true);
-      setTimeout(() => {
-        window.checkDesktopNav();
-      }, 100);
-    };
-
-    window.forceMobile = () => {
-      setIsDesktop(false);
-    };
-
-    window.quickTest = () => {
-      if (!isDesktop && window.innerWidth >= 1024) {
-        window.forceDesktop();
-      } else if (isDesktop && window.innerWidth < 1024) {
-        window.forceMobile();
-      } else {
-        if (isDesktop) {
-          window.testLanguageChange('en');
-        }
-      }
-    };
-
     window.verifyContexts = () => {
       /* context verification */
     };

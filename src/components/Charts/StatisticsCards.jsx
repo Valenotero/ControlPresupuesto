@@ -72,7 +72,7 @@ function StatisticsCards({ statistics }) {
       {cards.map((card, index) => {
         const colors = getColorClasses(card.color);
         const Icon = card.icon;
-        
+
         return (
           <div key={index} className="card p-4">
             <div className="flex items-center justify-between mb-3">
@@ -80,7 +80,7 @@ function StatisticsCards({ statistics }) {
                 <Icon className={`h-5 w-5 ${colors.icon}`} />
               </div>
             </div>
-            
+
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">
                 {card.title}
