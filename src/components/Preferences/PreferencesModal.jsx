@@ -12,7 +12,7 @@ function PreferencesModal({ isOpen, onClose }) {
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState('account');
-  
+
   // Estados para cambio de contraseña
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [passwordData, setPasswordData] = useState({
@@ -33,23 +33,23 @@ function PreferencesModal({ isOpen, onClose }) {
   // Validar campos de contraseña
   const validatePasswordFields = () => {
     const errors = {};
-    
+
     if (!passwordData.currentPassword) {
       errors.currentPassword = t('currentPasswordRequired');
     }
-    
+
     if (!passwordData.newPassword) {
       errors.newPassword = t('newPasswordRequired');
     } else if (passwordData.newPassword.length < 6) {
       errors.newPassword = t('newPasswordMinLength');
     }
-    
+
     if (!passwordData.confirmNewPassword) {
       errors.confirmNewPassword = t('confirmNewPasswordRequired');
     } else if (passwordData.newPassword !== passwordData.confirmNewPassword) {
       errors.confirmNewPassword = t('newPasswordsNoMatch');
     }
-    
+
     setPasswordErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -57,7 +57,7 @@ function PreferencesModal({ isOpen, onClose }) {
   // Manejar cambio de contraseña
   const handleChangePassword = async () => {
     if (!validatePasswordFields()) return;
-    
+
     setIsChangingPassword(true);
     try {
       await changePassword(passwordData.currentPassword, passwordData.newPassword, {
@@ -65,7 +65,7 @@ function PreferencesModal({ isOpen, onClose }) {
         error: t('errorChangingPassword'),
         translateFirebaseError
       });
-      
+
       // Limpiar formulario y cerrar
       setPasswordData({
         currentPassword: '',
@@ -103,7 +103,7 @@ function PreferencesModal({ isOpen, onClose }) {
     setShowDeleteConfirm(false);
     setDeleteConfirmText('');
     setActiveTab('account');
-    
+
     // Limpiar estados de cambio de contraseña
     setShowChangePassword(false);
     setPasswordData({
@@ -117,26 +117,26 @@ function PreferencesModal({ isOpen, onClose }) {
       new: false,
       confirm: false
     });
-    
+
     onClose();
   };
 
   const handleDeleteAccount = async () => {
     if (isDeleting) return;
-    
-    const requiredText = currentLanguage === 'en' ? 'DELETE' : 
-                        currentLanguage === 'fr' ? 'SUPPRIMER' :
-                        currentLanguage === 'pt' ? 'EXCLUIR' :
-                        currentLanguage === 'it' ? 'ELIMINA' : 'ELIMINAR';
-    
+
+    const requiredText = currentLanguage === 'en' ? 'DELETE' :
+      currentLanguage === 'fr' ? 'SUPPRIMER' :
+        currentLanguage === 'pt' ? 'EXCLUIR' :
+          currentLanguage === 'it' ? 'ELIMINA' : 'ELIMINAR';
+
     if (deleteConfirmText !== requiredText) {
       return;
     }
-    
+
     if (!window.confirm(t('confirmDeleteAccount'))) {
       return;
     }
-    
+
     setIsDeleting(true);
     try {
       await deleteAccount({
@@ -152,10 +152,10 @@ function PreferencesModal({ isOpen, onClose }) {
   };
 
   const getRequiredDeleteText = () => {
-    return currentLanguage === 'en' ? 'DELETE' : 
-           currentLanguage === 'fr' ? 'SUPPRIMER' :
-           currentLanguage === 'pt' ? 'EXCLUIR' :
-           currentLanguage === 'it' ? 'ELIMINA' : 'ELIMINAR';
+    return currentLanguage === 'en' ? 'DELETE' :
+      currentLanguage === 'fr' ? 'SUPPRIMER' :
+        currentLanguage === 'pt' ? 'EXCLUIR' :
+          currentLanguage === 'it' ? 'ELIMINA' : 'ELIMINAR';
   };
 
   const isDeleteConfirmValid = deleteConfirmText === getRequiredDeleteText();
@@ -200,11 +200,10 @@ function PreferencesModal({ isOpen, onClose }) {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 px-6 py-4 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === tab.id
+                  className={`flex items-center space-x-2 px-6 py-4 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                       ? 'border-primary-500 text-primary-600 bg-primary-50'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <Icon className="h-4 w-4" />
                   <span>{tab.name}</span>
@@ -276,10 +275,10 @@ function PreferencesModal({ isOpen, onClose }) {
                     <span className="text-sm text-gray-600">Idioma de interfaz</span>
                     <span className="text-sm font-medium text-gray-900">
                       {currentLanguage === 'es' ? 'Español' :
-                       currentLanguage === 'en' ? 'English' :
-                       currentLanguage === 'fr' ? 'Français' :
-                       currentLanguage === 'pt' ? 'Português' :
-                       currentLanguage === 'it' ? 'Italiano' : currentLanguage}
+                        currentLanguage === 'en' ? 'English' :
+                          currentLanguage === 'fr' ? 'Français' :
+                            currentLanguage === 'pt' ? 'Português' :
+                              currentLanguage === 'it' ? 'Italiano' : currentLanguage}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -291,8 +290,8 @@ function PreferencesModal({ isOpen, onClose }) {
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Cuenta creada</span>
                     <span className="text-sm font-medium text-gray-900">
-                      {currentUser?.metadata?.creationTime ? 
-                        new Date(currentUser.metadata.creationTime).toLocaleDateString() : 
+                      {currentUser?.metadata?.creationTime ?
+                        new Date(currentUser.metadata.creationTime).toLocaleDateString() :
                         'Información no disponible'}
                     </span>
                   </div>
@@ -339,11 +338,10 @@ function PreferencesModal({ isOpen, onClose }) {
                           type={showPasswords.current ? 'text' : 'password'}
                           value={passwordData.currentPassword}
                           onChange={(e) => handlePasswordInputChange('currentPassword', e.target.value)}
-                          className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 transition-colors ${
-                            passwordErrors.currentPassword
+                          className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 transition-colors ${passwordErrors.currentPassword
                               ? 'border-red-300 focus:border-red-500'
                               : 'border-gray-300 focus:border-blue-500'
-                          }`}
+                            }`}
                           placeholder={t('currentPasswordPlaceholder')}
                         />
                         <button
@@ -373,11 +371,10 @@ function PreferencesModal({ isOpen, onClose }) {
                           type={showPasswords.new ? 'text' : 'password'}
                           value={passwordData.newPassword}
                           onChange={(e) => handlePasswordInputChange('newPassword', e.target.value)}
-                          className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 transition-colors ${
-                            passwordErrors.newPassword
+                          className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 transition-colors ${passwordErrors.newPassword
                               ? 'border-red-300 focus:border-red-500'
                               : 'border-gray-300 focus:border-blue-500'
-                          }`}
+                            }`}
                           placeholder={t('newPasswordPlaceholder')}
                         />
                         <button
@@ -407,11 +404,10 @@ function PreferencesModal({ isOpen, onClose }) {
                           type={showPasswords.confirm ? 'text' : 'password'}
                           value={passwordData.confirmNewPassword}
                           onChange={(e) => handlePasswordInputChange('confirmNewPassword', e.target.value)}
-                          className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 transition-colors ${
-                            passwordErrors.confirmNewPassword
+                          className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 transition-colors ${passwordErrors.confirmNewPassword
                               ? 'border-red-300 focus:border-red-500'
                               : 'border-gray-300 focus:border-blue-500'
-                          }`}
+                            }`}
                           placeholder={t('confirmNewPasswordPlaceholder')}
                         />
                         <button
@@ -436,18 +432,17 @@ function PreferencesModal({ isOpen, onClose }) {
                       <button
                         onClick={handleChangePassword}
                         disabled={isChangingPassword}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                          isChangingPassword
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isChangingPassword
                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             : 'bg-blue-600 text-white hover:bg-blue-700'
-                        }`}
+                          }`}
                       >
                         <Lock className="h-4 w-4" />
                         <span>
                           {isChangingPassword ? t('loading') : t('changePassword')}
                         </span>
                       </button>
-                      
+
                       <button
                         onClick={() => {
                           setShowChangePassword(false);
@@ -505,7 +500,7 @@ function PreferencesModal({ isOpen, onClose }) {
                             {t('confirmDeleteAccountPermanent')}
                           </p>
                         </div>
-                        
+
                         <div className="space-y-3">
                           <label className="block text-sm font-medium text-red-700">
                             {t('typeDeleteToConfirm')}
@@ -518,23 +513,22 @@ function PreferencesModal({ isOpen, onClose }) {
                             placeholder={getRequiredDeleteText()}
                           />
                         </div>
-                        
+
                         <div className="flex space-x-3">
                           <button
                             onClick={handleDeleteAccount}
                             disabled={!isDeleteConfirmValid || isDeleting}
-                            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                              isDeleteConfirmValid && !isDeleting
+                            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isDeleteConfirmValid && !isDeleting
                                 ? 'bg-red-600 text-white hover:bg-red-700'
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            }`}
+                              }`}
                           >
                             <Trash2 className="h-4 w-4" />
                             <span>
                               {isDeleting ? t('loading') : t('deleteAccount')}
                             </span>
                           </button>
-                          
+
                           <button
                             onClick={() => {
                               setShowDeleteConfirm(false);
