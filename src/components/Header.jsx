@@ -48,7 +48,7 @@ function Header() {
   const getLanguageFlag = (langCode) => {
     const flags = {
       es: '🇪🇸',
-      en: '🇺🇸', 
+      en: '🇺🇸',
       fr: '🇫🇷',
       pt: '🇧🇷',
       it: '🇮🇹'
@@ -79,12 +79,12 @@ function Header() {
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
     window.addEventListener('resize', handleResize);
-    
+
     // Debug para verificar la nueva navegación inferior en móviles y tablets
     if (window.innerWidth < 1024) {
       console.log('📱 MOBILE/TABLET BOTTOM NAVIGATION LOADED');
       console.log('✅ Bottom navigation should be visible at the bottom of the screen');
-      
+
       // Función global para testing
       window.testBottomNav = () => {
         console.log('🧪 TESTING BOTTOM NAVIGATION');
@@ -154,7 +154,7 @@ function Header() {
     window.diagnoseNavbar = () => {
       console.log('🏥 NAVBAR DIAGNOSIS STARTING...');
       console.log('='.repeat(50));
-      
+
       // 1. Verificar viewport
       console.log('1️⃣ VIEWPORT CHECK:');
       console.log('Window width:', window.innerWidth);
@@ -162,17 +162,17 @@ function Header() {
       console.log('Is mobile/tablet:', window.innerWidth < 1024);
       console.log('React isDesktop state:', isDesktop);
       console.log('');
-      
+
       // 2. Verificar navegación desktop
       console.log('2️⃣ DESKTOP NAVIGATION CHECK:');
       window.checkDesktopNav();
       console.log('');
-      
+
       // 3. Verificar contextos
       console.log('3️⃣ CONTEXT CHECK:');
       window.verifyContexts();
       console.log('');
-      
+
       // 4. Verificar espaciado del footer
       console.log('4️⃣ FOOTER SPACING CHECK:');
       if (window.innerWidth < 1024) {
@@ -181,18 +181,18 @@ function Header() {
         console.log('Desktop mode - footer spacing not needed');
       }
       console.log('');
-      
-             // 5. Sugerencias
-       console.log('5️⃣ SUGGESTIONS:');
+
+      // 5. Sugerencias
+      console.log('5️⃣ SUGGESTIONS:');
       if (window.innerWidth >= 1024) {
         console.log('✅ You are on desktop - navigation should be visible');
         console.log('🔧 Try: window.forceDesktop() to force desktop mode');
         console.log('🎨 Try: window.debugVisualNav() to add visual debugging');
-              } else {
-          console.log('📱 You are on mobile/tablet - try resizing window to desktop size');
-          console.log('🔧 Try: window.forceDesktop() to simulate desktop mode');
-          console.log('🦶 Try: window.fixFooterSpacing() to fix footer spacing issues');
-        }
+      } else {
+        console.log('📱 You are on mobile/tablet - try resizing window to desktop size');
+        console.log('🔧 Try: window.forceDesktop() to simulate desktop mode');
+        console.log('🦶 Try: window.fixFooterSpacing() to fix footer spacing issues');
+      }
       console.log('='.repeat(50));
     };
 
@@ -218,7 +218,7 @@ function Header() {
       console.log('⚡ QUICK TEST STARTING...');
       console.log('Current mode:', isDesktop ? 'Desktop' : 'Mobile');
       console.log('Window width:', window.innerWidth);
-      
+
       if (!isDesktop && window.innerWidth >= 1024) {
         console.log('🔧 Fixing: Window is desktop size but state is mobile/tablet. Forcing desktop mode...');
         window.forceDesktop();
@@ -289,48 +289,48 @@ function Header() {
     window.checkFooterSpacing = () => {
       const footer = document.querySelector('footer');
       const bottomNav = document.querySelector('.fixed.bottom-0');
-      
+
       console.log('👥 FOOTER SPACING CHECK:');
       console.log('Footer found:', !!footer);
       console.log('Bottom nav found:', !!bottomNav);
-      
+
       if (footer && bottomNav) {
         const footerRect = footer.getBoundingClientRect();
         const bottomNavRect = bottomNav.getBoundingClientRect();
         const gap = bottomNavRect.top - footerRect.bottom;
-        
+
         console.log('Footer bottom:', footerRect.bottom);
         console.log('Bottom nav top:', bottomNavRect.top);
         console.log('Gap between footer and nav:', gap + 'px');
         console.log('Is footer visible?', footerRect.bottom < bottomNavRect.top);
-        
+
         if (gap < 0) {
           console.log('🚨 FOOTER IS BEING COVERED BY BOTTOM NAV!');
           console.log('Need to increase margin-bottom of footer');
         } else {
           console.log('✅ Footer has proper spacing');
         }
-             }
-     };
+      }
+    };
 
-     // Función para ajustar espaciado del footer dinámicamente
-     window.fixFooterSpacing = () => {
-       const footer = document.querySelector('footer');
-       if (footer && window.innerWidth < 1024) {
-         const currentMargin = window.getComputedStyle(footer).marginBottom;
-         console.log('Current footer margin-bottom:', currentMargin);
-         
-         // Agregar más espaciado
-         footer.style.marginBottom = 'calc(100px + env(safe-area-inset-bottom))';
-         console.log('✅ Footer spacing increased for better visibility');
-         
-         // Verificar después del cambio
-         setTimeout(() => {
-           window.checkFooterSpacing();
-         }, 100);
-       }
-     };
-     
+    // Función para ajustar espaciado del footer dinámicamente
+    window.fixFooterSpacing = () => {
+      const footer = document.querySelector('footer');
+      if (footer && window.innerWidth < 1024) {
+        const currentMargin = window.getComputedStyle(footer).marginBottom;
+        console.log('Current footer margin-bottom:', currentMargin);
+
+        // Agregar más espaciado
+        footer.style.marginBottom = 'calc(100px + env(safe-area-inset-bottom))';
+        console.log('✅ Footer spacing increased for better visibility');
+
+        // Verificar después del cambio
+        setTimeout(() => {
+          window.checkFooterSpacing();
+        }, 100);
+      }
+    };
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
@@ -344,13 +344,13 @@ function Header() {
       <header className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50 backdrop-blur-md bg-white/95">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            
+
             {/* Logo y título */}
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg">
-                <img 
-                  src="/logotipo.jpg" 
-                  alt="Logo" 
+                <img
+                  src="/logotipo.jpg"
+                  alt="Logo"
                   className="h-8 w-8 rounded-lg object-cover"
                 />
               </div>
@@ -367,11 +367,7 @@ function Header() {
             {/* Desktop Navigation - Controlado por estado React */}
             {isDesktop && (
               <div className="desktop-navigation flex items-center space-x-6">
-                {/* Debug info */}
-                <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
-                  ✅ Desktop Mode ({window.innerWidth}px ≥ 1024px)
-                </span>
-                
+
                 {/* Estado de finanzas */}
                 <div className="flex items-center space-x-2 bg-success-50 text-success-700 px-4 py-2 rounded-full">
                   <TrendingUp className="h-4 w-4" />
@@ -391,11 +387,10 @@ function Header() {
                     <span className="text-sm font-medium text-gray-700">
                       {getLanguageFlag(currentLanguage)}
                     </span>
-                    <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
-                      showLanguageDropdown ? 'rotate-180' : ''
-                    }`} />
+                    <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${showLanguageDropdown ? 'rotate-180' : ''
+                      }`} />
                   </button>
-                  
+
                   {showLanguageDropdown && (
                     <div className="absolute top-full mt-2 right-0 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 animate-slide-down">
                       {availableLanguages.map((lang) => (
@@ -431,11 +426,10 @@ function Header() {
                     <span className="text-sm font-medium text-gray-700 font-mono">
                       {availableCurrencies.find(c => c.code === currentCurrency)?.symbol}
                     </span>
-                    <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
-                      showCurrencyDropdown ? 'rotate-180' : ''
-                    }`} />
+                    <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${showCurrencyDropdown ? 'rotate-180' : ''
+                      }`} />
                   </button>
-                  
+
                   {showCurrencyDropdown && (
                     <div className="absolute top-full mt-2 right-0 w-64 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 animate-slide-down max-h-60 overflow-y-auto">
                       {availableCurrencies.map((currency) => (
@@ -481,9 +475,8 @@ function Header() {
                         {t('preferences')}
                       </p>
                     </div>
-                    <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
-                      showUserMenu ? 'rotate-180' : ''
-                    }`} />
+                    <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''
+                      }`} />
                   </button>
 
                   {showUserMenu && (
@@ -556,7 +549,7 @@ function Header() {
       {!isDesktop && (
         <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200 z-50 safe-bottom bottom-nav-shadow">
           <div className="grid grid-cols-4 gap-2 px-3 py-3">
-            
+
             {/* Estado de finanzas */}
             <div className="flex flex-col items-center justify-center py-2">
               <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-success-500 to-success-600 rounded-2xl mb-2 shadow-lg">
@@ -575,11 +568,10 @@ function Header() {
                 }}
                 className="flex flex-col items-center justify-center py-2 w-full touch-manipulation group"
               >
-                <div className={`flex items-center justify-center w-12 h-12 rounded-2xl mb-2 shadow-lg transition-all duration-200 ${
-                  showLanguageDropdown 
-                    ? 'bg-gradient-to-br from-blue-500 to-blue-600 scale-110' 
+                <div className={`flex items-center justify-center w-12 h-12 rounded-2xl mb-2 shadow-lg transition-all duration-200 ${showLanguageDropdown
+                    ? 'bg-gradient-to-br from-blue-500 to-blue-600 scale-110'
                     : 'bg-gradient-to-br from-gray-100 to-gray-200 group-active:scale-95'
-                }`}>
+                  }`}>
                   <span className="text-2xl">{getLanguageFlag(currentLanguage)}</span>
                 </div>
                 <span className="text-xs text-gray-700 font-semibold">Idioma</span>
@@ -587,7 +579,7 @@ function Header() {
                   {availableLanguages.find(l => l.code === currentLanguage)?.name.substring(0, 3)}
                 </span>
               </button>
-              
+
               {showLanguageDropdown && (
                 <div className="bottom-nav-dropdown py-1">
                   <div className="px-3 py-2 border-b border-gray-100">
@@ -600,9 +592,8 @@ function Header() {
                         console.log('📱 Mobile language button clicked:', lang.code);
                         handleLanguageChange(lang.code);
                       }}
-                      className={`w-full flex items-center space-x-3 px-3 py-3 text-sm hover:bg-gray-50 transition-colors duration-200 touch-manipulation ${
-                        currentLanguage === lang.code ? 'bg-blue-50' : ''
-                      }`}
+                      className={`w-full flex items-center space-x-3 px-3 py-3 text-sm hover:bg-gray-50 transition-colors duration-200 touch-manipulation ${currentLanguage === lang.code ? 'bg-blue-50' : ''
+                        }`}
                     >
                       <span className="text-lg">{getLanguageFlag(lang.code)}</span>
                       <div className="flex-1 text-left">
@@ -626,11 +617,10 @@ function Header() {
                 }}
                 className="flex flex-col items-center justify-center py-2 w-full touch-manipulation group"
               >
-                <div className={`flex items-center justify-center w-12 h-12 rounded-2xl mb-2 shadow-lg transition-all duration-200 ${
-                  showCurrencyDropdown 
-                    ? 'bg-gradient-to-br from-amber-500 to-amber-600 scale-110' 
+                <div className={`flex items-center justify-center w-12 h-12 rounded-2xl mb-2 shadow-lg transition-all duration-200 ${showCurrencyDropdown
+                    ? 'bg-gradient-to-br from-amber-500 to-amber-600 scale-110'
                     : 'bg-gradient-to-br from-gray-100 to-gray-200 group-active:scale-95'
-                }`}>
+                  }`}>
                   <span className="text-xl font-mono font-bold text-gray-700">
                     {availableCurrencies.find(c => c.code === currentCurrency)?.symbol}
                   </span>
@@ -640,7 +630,7 @@ function Header() {
                   {currentCurrency}
                 </span>
               </button>
-              
+
               {showCurrencyDropdown && (
                 <div className="bottom-nav-dropdown py-1">
                   <div className="px-3 py-2 border-b border-gray-100">
@@ -653,9 +643,8 @@ function Header() {
                         console.log('📱 Mobile currency button clicked:', currency.code);
                         handleCurrencyChange(currency.code);
                       }}
-                      className={`w-full flex items-center space-x-3 px-3 py-3 text-sm hover:bg-gray-50 transition-colors duration-200 touch-manipulation ${
-                        currentCurrency === currency.code ? 'bg-amber-50' : ''
-                      }`}
+                      className={`w-full flex items-center space-x-3 px-3 py-3 text-sm hover:bg-gray-50 transition-colors duration-200 touch-manipulation ${currentCurrency === currency.code ? 'bg-amber-50' : ''
+                        }`}
                     >
                       <span className="text-lg font-mono font-bold text-amber-600 w-6 text-center">{currency.symbol}</span>
                       <div className="flex-1 text-left">
@@ -680,11 +669,10 @@ function Header() {
                 }}
                 className="flex flex-col items-center justify-center py-2 w-full touch-manipulation group"
               >
-                <div className={`flex items-center justify-center w-12 h-12 rounded-2xl mb-2 shadow-lg transition-all duration-200 ${
-                  showUserMenu 
-                    ? 'bg-gradient-to-br from-primary-500 to-primary-600 scale-110' 
+                <div className={`flex items-center justify-center w-12 h-12 rounded-2xl mb-2 shadow-lg transition-all duration-200 ${showUserMenu
+                    ? 'bg-gradient-to-br from-primary-500 to-primary-600 scale-110'
                     : 'bg-gradient-to-br from-gray-100 to-gray-200 group-active:scale-95'
-                }`}>
+                  }`}>
                   <User className={`h-6 w-6 ${showUserMenu ? 'text-white' : 'text-gray-700'}`} />
                 </div>
                 <span className="text-xs text-gray-700 font-semibold">Usuario</span>
@@ -746,7 +734,7 @@ function Header() {
         </div>
       )}
 
-      <PreferencesModal 
+      <PreferencesModal
         isOpen={showPreferences}
         onClose={() => setShowPreferences(false)}
       />
