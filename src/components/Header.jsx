@@ -39,6 +39,17 @@ function Header() {
     setShowUserMenu(false); // Cerrar el menú principal después de seleccionar
   };
 
+  // Optimización para eventos touch en móviles
+  const handleTouchInteraction = (callback) => {
+    return (e) => {
+      e.preventDefault();
+      // Agregar pequeño delay para evitar doble tap
+      setTimeout(() => {
+        callback();
+      }, 50);
+    };
+  };
+
   // Obtener bandera del país para el idioma
   const getLanguageFlag = (langCode) => {
     const flags = {
@@ -180,7 +191,12 @@ function Header() {
                             setShowLanguageDropdown(!showLanguageDropdown);
                             setShowCurrencyDropdown(false); // Cerrar el otro dropdown
                           }}
-                          className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                          onTouchStart={handleTouchInteraction(() => {
+                            setShowLanguageDropdown(!showLanguageDropdown);
+                            setShowCurrencyDropdown(false);
+                          })}
+                          className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
+                          style={{ WebkitTapHighlightColor: 'transparent' }}
                         >
                           <Globe className="h-4 w-4 mr-3 text-gray-400" />
                           <span>{t('language')}</span>
@@ -194,7 +210,9 @@ function Header() {
                               <button
                                 key={lang.code}
                                 onClick={() => handleLanguageChange(lang.code)}
-                                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                onTouchStart={handleTouchInteraction(() => handleLanguageChange(lang.code))}
+                                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
+                                style={{ WebkitTapHighlightColor: 'transparent' }}
                               >
                                 <span className="mr-3">{getLanguageFlag(lang.code)}</span>
                                 <span className="flex-1 text-left">{lang.name}</span>
@@ -228,7 +246,9 @@ function Header() {
                               <button
                                 key={currency.code}
                                 onClick={() => handleCurrencyChange(currency.code)}
-                                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                onTouchStart={handleTouchInteraction(() => handleCurrencyChange(currency.code))}
+                                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
+                                style={{ WebkitTapHighlightColor: 'transparent' }}
                               >
                                 <span className="mr-3 font-mono text-primary-600">{currency.symbol}</span>
                                 <div className="flex-1 text-left">
@@ -335,34 +355,44 @@ function Header() {
                       setShowLanguageDropdown(!showLanguageDropdown);
                       setShowMobileMenu(false);
                     }}
-                    className="w-full flex items-center space-x-3 py-3 px-4 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    onTouchStart={handleTouchInteraction(() => {
+                      setShowLanguageDropdown(!showLanguageDropdown);
+                      setShowMobileMenu(false);
+                    })}
+                    className="w-full flex items-center space-x-3 py-3 px-4 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors touch-manipulation"
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
                   >
                     <Globe className="h-5 w-5 text-gray-400" />
                     <span className="font-medium flex-1 text-left">{t('language')}</span>
                     <span className="text-sm">{getLanguageFlag(currentLanguage)}</span>
                   </button>
                   
-                  {/* Language Dropdown Mobile */}
-                  {showLanguageDropdown && (
-                    <div className="absolute top-0 left-0 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 animate-slide-down">
-                      {availableLanguages.map((lang) => (
-                        <button
-                          key={lang.code}
-                          onClick={() => {
-                            handleLanguageChange(lang.code);
-                            setShowMobileMenu(false);
-                          }}
-                          className="w-full flex items-center space-x-3 py-3 px-4 text-gray-700 hover:bg-gray-100 transition-colors"
-                        >
-                          <span>{getLanguageFlag(lang.code)}</span>
-                          <span className="flex-1 text-left font-medium">{lang.name}</span>
-                          {currentLanguage === lang.code && (
-                            <Check className="h-5 w-5 text-primary-600" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                                        {/* Language Dropdown Mobile */}
+                      {showLanguageDropdown && (
+                        <div className="absolute top-0 left-0 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 animate-slide-down">
+                          {availableLanguages.map((lang) => (
+                            <button
+                              key={lang.code}
+                              onClick={() => {
+                                handleLanguageChange(lang.code);
+                                setShowMobileMenu(false);
+                              }}
+                              onTouchStart={handleTouchInteraction(() => {
+                                handleLanguageChange(lang.code);
+                                setShowMobileMenu(false);
+                              })}
+                              className="w-full flex items-center space-x-3 py-3 px-4 text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
+                              style={{ WebkitTapHighlightColor: 'transparent' }}
+                            >
+                              <span>{getLanguageFlag(lang.code)}</span>
+                              <span className="flex-1 text-left font-medium">{lang.name}</span>
+                              {currentLanguage === lang.code && (
+                                <Check className="h-5 w-5 text-primary-600" />
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                 </div>
                 
                 {/* Currency Selector Mobile */}
@@ -372,37 +402,47 @@ function Header() {
                       setShowCurrencyDropdown(!showCurrencyDropdown);
                       setShowMobileMenu(false);
                     }}
-                    className="w-full flex items-center space-x-3 py-3 px-4 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    onTouchStart={handleTouchInteraction(() => {
+                      setShowCurrencyDropdown(!showCurrencyDropdown);
+                      setShowMobileMenu(false);
+                    })}
+                    className="w-full flex items-center space-x-3 py-3 px-4 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors touch-manipulation"
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
                   >
                     <DollarSign className="h-5 w-5 text-gray-400" />
                     <span className="font-medium flex-1 text-left">{t('currency')}</span>
                     <span className="text-sm font-mono">{availableCurrencies.find(c => c.code === currentCurrency)?.symbol}</span>
                   </button>
                   
-                  {/* Currency Dropdown Mobile */}
-                  {showCurrencyDropdown && (
-                    <div className="absolute top-0 left-0 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 animate-slide-down max-h-48 overflow-y-auto">
-                      {availableCurrencies.map((currency) => (
-                        <button
-                          key={currency.code}
-                          onClick={() => {
-                            handleCurrencyChange(currency.code);
-                            setShowMobileMenu(false);
-                          }}
-                          className="w-full flex items-center space-x-3 py-3 px-4 text-gray-700 hover:bg-gray-100 transition-colors"
-                        >
-                          <span className="font-mono text-primary-600 w-8">{currency.symbol}</span>
-                          <div className="flex-1 text-left">
-                            <span className="font-medium">{currency.code}</span>
-                            <span className="block text-xs text-gray-500">{currency.name}</span>
-                          </div>
-                          {currentCurrency === currency.code && (
-                            <Check className="h-5 w-5 text-primary-600" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                                        {/* Currency Dropdown Mobile */}
+                      {showCurrencyDropdown && (
+                        <div className="absolute top-0 left-0 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 animate-slide-down max-h-48 overflow-y-auto">
+                          {availableCurrencies.map((currency) => (
+                            <button
+                              key={currency.code}
+                              onClick={() => {
+                                handleCurrencyChange(currency.code);
+                                setShowMobileMenu(false);
+                              }}
+                              onTouchStart={handleTouchInteraction(() => {
+                                handleCurrencyChange(currency.code);
+                                setShowMobileMenu(false);
+                              })}
+                              className="w-full flex items-center space-x-3 py-3 px-4 text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
+                              style={{ WebkitTapHighlightColor: 'transparent' }}
+                            >
+                              <span className="font-mono text-primary-600 w-8">{currency.symbol}</span>
+                              <div className="flex-1 text-left">
+                                <span className="font-medium">{currency.code}</span>
+                                <span className="block text-xs text-gray-500">{currency.name}</span>
+                              </div>
+                              {currentCurrency === currency.code && (
+                                <Check className="h-5 w-5 text-primary-600" />
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                 </div>
               </div>
               
