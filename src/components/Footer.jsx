@@ -5,8 +5,8 @@ function Footer() {
   const { t } = useLanguage();
 
   return (
-    <footer className="bg-white border-t border-gray-200 mt-auto">
-      <div className="container mx-auto px-4 py-6">
+    <footer className="bg-white border-t border-gray-200 mt-auto shadow-sm">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
         <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
           {/* Logo y info */}
           <div className="flex items-center space-x-3">
