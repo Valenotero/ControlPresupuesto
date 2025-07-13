@@ -17,7 +17,7 @@ function TransactionList() {
     if (isSmallScreen) {
       return formatDate(dateString, 'short');
     }
-    
+
     return formatRelativeDate(dateString);
   };
 
@@ -34,7 +34,7 @@ function TransactionList() {
   const filteredTransactions = transactions.filter(transaction => {
     const matchesFilter = filter === 'all' || transaction.type === filter;
     const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         getCategoryName(transaction.category).toLowerCase().includes(searchTerm.toLowerCase());
+      getCategoryName(transaction.category).toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -128,7 +128,7 @@ function TransactionList() {
                     style={{ backgroundColor: getCategoryColor(transaction.category) }}
                   ></div>
                 </div>
-                
+
                 {/* Información principal */}
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -146,7 +146,7 @@ function TransactionList() {
                         </span>
                       </div>
                     </div>
-                    
+
                     {/* Monto - En la misma línea en desktop */}
                     <div className="flex items-center justify-between sm:justify-end mt-2 sm:mt-0 sm:ml-4">
                       <div className="flex items-center space-x-1">
@@ -156,14 +156,13 @@ function TransactionList() {
                           <TrendingDown className="h-4 w-4 text-danger-500 flex-shrink-0" />
                         )}
                         <span
-                          className={`text-sm sm:text-base font-semibold ${
-                            transaction.type === 'income' ? 'text-success-600' : 'text-danger-600'
-                          }`}
+                          className={`text-sm sm:text-base font-semibold ${transaction.type === 'income' ? 'text-success-600' : 'text-danger-600'
+                            }`}
                         >
                           {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                         </span>
                       </div>
-                      
+
                       {/* Botón eliminar */}
                       <button
                         onClick={() => handleDelete(transaction.id)}
@@ -197,7 +196,7 @@ function TransactionList() {
             <p className="text-xs sm:text-sm text-gray-600">
               {t('showing')} {filteredTransactions.length} {t('of')} {transactions.length} {t('transactions')}
             </p>
-            
+
             {/* Stats rápidas en una sola línea en móvil */}
             <div className="flex items-center space-x-4 text-xs text-gray-500">
               <span className="flex items-center space-x-1">

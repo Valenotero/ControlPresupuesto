@@ -1,3 +1,4 @@
+// src/components/Analytics.jsx
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useCurrency } from '../context/CurrencyContext';
@@ -8,15 +9,15 @@ import CategoryPieChart from './Charts/CategoryPieChart';
 import BalanceLineChart from './Charts/BalanceLineChart';
 import { BarChart3, PieChart, TrendingUp, X } from 'lucide-react';
 
-function Analytics({ isOpen, onClose }) {
+export default function Analytics({ isOpen, onClose }) {
   const { t } = useLanguage();
   const { formatCurrency } = useCurrency();
-  const { 
-    monthlyData, 
-    expenseCategoryData, 
-    incomeCategoryData, 
-    balanceEvolutionData, 
-    statistics 
+  const {
+    monthlyData,
+    expenseCategoryData,
+    incomeCategoryData,
+    balanceEvolutionData,
+    statistics
   } = useChartData();
 
   const [activeTab, setActiveTab] = useState('overview');
@@ -32,7 +33,7 @@ function Analytics({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
       <div className="bg-white rounded-lg sm:rounded-xl shadow-2xl w-full max-w-7xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header - Más compacto en móvil */}
+        {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="p-1.5 sm:p-2 bg-primary-100 rounded-lg">
@@ -43,7 +44,7 @@ function Analytics({ isOpen, onClose }) {
                 {t('analytics')}
               </h2>
               <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">
-                Análisis detallado de tus finanzas
+                {t('detailedAnalysis')}
               </p>
             </div>
           </div>
@@ -55,7 +56,7 @@ function Analytics({ isOpen, onClose }) {
           </button>
         </div>
 
-        {/* Tabs - Optimizado para móviles */}
+        {/* Tabs */}
         <div className="border-b border-gray-200 flex-shrink-0">
           <nav className="flex">
             {tabs.map((tab) => {
@@ -79,14 +80,14 @@ function Analytics({ isOpen, onClose }) {
           </nav>
         </div>
 
-        {/* Content - Con scroll optimizado */}
+        {/* Content */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-3 sm:p-6">
             {activeTab === 'overview' && (
               <div className="space-y-4 sm:space-y-6">
                 {/* Statistics Cards */}
                 <StatisticsCards statistics={statistics} />
-                
+
                 {/* Monthly Trend Chart */}
                 <div className="card">
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
@@ -99,30 +100,21 @@ function Analytics({ isOpen, onClose }) {
 
             {activeTab === 'categories' && (
               <div className="space-y-4 sm:space-y-6">
-                {/* En móvil: stack vertical, en desktop: grid */}
                 <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6">
                   {/* Expense Categories */}
                   <div className="card">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
                       {`${t('categoryDistribution')} - ${t('expense')}`}
                     </h3>
-                    <CategoryPieChart 
-                      data={expenseCategoryData}
-                      title=""
-                      type="expenses"
-                    />
+                    <CategoryPieChart data={expenseCategoryData} />
                   </div>
-                  
+
                   {/* Income Categories */}
                   <div className="card">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
                       {`${t('categoryDistribution')} - ${t('income')}`}
                     </h3>
-                    <CategoryPieChart 
-                      data={incomeCategoryData}
-                      title=""
-                      type="income"
-                    />
+                    <CategoryPieChart data={incomeCategoryData} />
                   </div>
                 </div>
               </div>
@@ -137,14 +129,13 @@ function Analytics({ isOpen, onClose }) {
                   </h3>
                   <BalanceLineChart data={balanceEvolutionData} />
                 </div>
-                
+
                 {/* Monthly Data Table */}
                 {monthlyData.length > 0 && (
                   <div className="card">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
                       {t('lastMonths')}
                     </h3>
-                    {/* Responsive table */}
                     <div className="overflow-x-auto -mx-3 sm:mx-0">
                       <div className="inline-block min-w-full align-middle">
                         <table className="min-w-full divide-y divide-gray-200">
@@ -176,9 +167,11 @@ function Analytics({ isOpen, onClose }) {
                                 <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-danger-600 font-medium">
                                   {formatCurrency(month.expenses)}
                                 </td>
-                                <td className={`px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium ${
-                                  month.balance >= 0 ? 'text-success-600' : 'text-danger-600'
-                                }`}>
+                                <td
+                                  className={`px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium ${
+                                    month.balance >= 0 ? 'text-success-600' : 'text-danger-600'
+                                  }`}
+                                >
                                   {formatCurrency(month.balance)}
                                 </td>
                               </tr>
@@ -197,5 +190,3 @@ function Analytics({ isOpen, onClose }) {
     </div>
   );
 }
-
-export default Analytics; 

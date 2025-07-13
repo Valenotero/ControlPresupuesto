@@ -1,54 +1,51 @@
-import React, { useState } from 'react';
+// src/components/TransactionForm.jsx
+import React, { useState, useEffect } from 'react';
 import { useBudget } from '../context/BudgetContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { Plus, FileText, Tag, DollarSign, X } from 'lucide-react';
 
-function TransactionForm({ onClose }) {
+export default function TransactionForm({ onClose }) {
   const { addTransaction, categories } = useBudget();
   const { t } = useLanguage();
   const { currencySymbol, validateAmount } = useCurrency();
-  
+
+  const [visible, setVisible] = useState(false);
   const [formData, setFormData] = useState({
     description: '',
     amount: '',
     category: '',
     type: 'expense'
   });
-  
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // Trigger CSS transitions on mount
+  useEffect(() => {
+    requestAnimationFrame(() => setVisible(true));
+  }, []);
+
   const validateForm = () => {
     const newErrors = {};
-    
-    // Validar descripción
     if (!formData.description.trim()) {
       newErrors.description = t('descriptionRequired');
     }
-    
-    // Validar cantidad usando la función del contexto
     const amountValidation = validateAmount(formData.amount);
     if (!amountValidation.isValid) {
       newErrors.amount = amountValidation.error;
     } else if (amountValidation.value <= 0) {
       newErrors.amount = t('amountRequired');
     }
-    
-    // Validar categoría
     if (!formData.category) {
       newErrors.category = t('categoryRequired');
     }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-    
     setLoading(true);
     try {
       const amountValidation = validateAmount(formData.amount);
@@ -66,25 +63,14 @@ function TransactionForm({ onClose }) {
   };
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
-    // Limpiar errores cuando el usuario empiece a escribir
+    setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
+      setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
   const handleAmountChange = (value) => {
-    // Limitar la entrada de números muy grandes
     const numericValue = value.replace(/[^0-9.]/g, '');
-    
-    // Verificar que no exceda el límite máximo
     if (numericValue && parseFloat(numericValue) > 1e12) {
       setErrors(prev => ({
         ...prev,
@@ -92,17 +78,31 @@ function TransactionForm({ onClose }) {
       }));
       return;
     }
-    
     handleInputChange('amount', numericValue);
   };
 
   const filteredCategories = categories.filter(cat => cat.type === formData.type);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div
+      className={`
+        fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50
+        transition-opacity duration-300 ease-out
+        ${visible ? 'opacity-100' : 'opacity-0'}
+      `}
+      onClick={onClose}
+    >
+      <div
+        className={`
+          bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto
+          transform transition-transform duration-300 ease-out
+          ${visible ? 'scale-100' : 'scale-95'}
+        `}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+          <h2 className="text-xl font-semibold flex items-center">
             <Plus className="h-5 w-5 mr-2" />
             {t('addNewTransaction')}
           </h2>
@@ -114,6 +114,7 @@ function TransactionForm({ onClose }) {
           </button>
         </div>
 
+        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Tipo de transacción */}
           <div>
@@ -148,7 +149,10 @@ function TransactionForm({ onClose }) {
 
           {/* Descripción */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               {t('description')}
             </label>
             <div className="relative">
@@ -159,9 +163,11 @@ function TransactionForm({ onClose }) {
                 id="description"
                 type="text"
                 value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
+                onChange={e => handleInputChange('description', e.target.value)}
                 placeholder={t('transactionPlaceholder')}
-                className={`input-field pl-10 h-12 ${errors.description ? 'border-danger-500 focus:ring-danger-500' : ''}`}
+                className={`input-field pl-10 h-12 w-full ${
+                  errors.description ? 'border-danger-500 focus:ring-danger-500' : ''
+                }`}
                 maxLength={100}
               />
             </div>
@@ -172,7 +178,10 @@ function TransactionForm({ onClose }) {
 
           {/* Monto */}
           <div>
-            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="amount"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               {t('amount')}
             </label>
             <div className="relative">
@@ -184,9 +193,11 @@ function TransactionForm({ onClose }) {
                 type="text"
                 inputMode="decimal"
                 value={formData.amount}
-                onChange={(e) => handleAmountChange(e.target.value)}
+                onChange={e => handleAmountChange(e.target.value)}
                 placeholder="0.00"
-                className={`input-field pl-10 h-12 text-lg ${errors.amount ? 'border-danger-500 focus:ring-danger-500' : ''}`}
+                className={`input-field pl-10 h-12 w-full text-lg ${
+                  errors.amount ? 'border-danger-500 focus:ring-danger-500' : ''
+                }`}
               />
             </div>
             {errors.amount && (
@@ -194,14 +205,18 @@ function TransactionForm({ onClose }) {
             )}
             {formData.amount && parseFloat(formData.amount) >= 1e6 && (
               <p className="mt-1 text-xs text-warning-600">
-                💡 {t('largeNumberDetected')} {currencySymbol}{(parseFloat(formData.amount) / 1e6).toFixed(1)}M
+                💡 {t('largeNumberDetected')} {currencySymbol}
+                {(parseFloat(formData.amount) / 1e6).toFixed(1)}M
               </p>
             )}
           </div>
 
           {/* Categoría */}
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="category"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               {t('category')}
             </label>
             <div className="relative">
@@ -211,13 +226,15 @@ function TransactionForm({ onClose }) {
               <select
                 id="category"
                 value={formData.category}
-                onChange={(e) => handleInputChange('category', e.target.value)}
-                className={`input-field pl-10 h-12 ${errors.category ? 'border-danger-500 focus:ring-danger-500' : ''}`}
+                onChange={e => handleInputChange('category', e.target.value)}
+                className={`input-field pl-10 h-12 w-full ${
+                  errors.category ? 'border-danger-500 focus:ring-danger-500' : ''
+                }`}
               >
                 <option value="">{t('selectCategory')}</option>
-                {filteredCategories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
+                {filteredCategories.map(cat => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
                   </option>
                 ))}
               </select>
@@ -249,5 +266,3 @@ function TransactionForm({ onClose }) {
     </div>
   );
 }
-
-export default TransactionForm; 

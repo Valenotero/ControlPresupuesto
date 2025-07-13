@@ -142,6 +142,8 @@ const translations = {
     totalTransactions: 'Total de Transacciones',
     averageExpense: 'Gasto Promedio',
     averageIncome: 'Ingreso Promedio',
+    showAllCategories: 'categorías más',
+    showLess: 'Mostrar menos',
     
     // Preferences
     preferences: 'Preferencias',
@@ -250,7 +252,8 @@ const translations = {
     baseIncomeInfo3: 'Puedes modificarlo cuando quieras',
     placeholderAmount: '2000.00',
     set: 'Establecer',
-    update: 'Actualizar'
+    update: 'Actualizar',
+    allRightsReserved: 'Todos los derechos reservados',
   },
   
   en: {
@@ -381,6 +384,8 @@ const translations = {
     totalTransactions: 'Total Transactions',
     averageExpense: 'Average Expense',
     averageIncome: 'Average Income',
+    showAllCategories: 'more categories',
+    showLess: 'Show less',
     
     // Preferences
     preferences: 'Preferences',
@@ -489,7 +494,10 @@ const translations = {
     baseIncomeInfo3: 'You can modify it whenever you want',
     placeholderAmount: '2000.00',
     set: 'Set',
-    update: 'Update'
+    update: 'Update',
+
+    allRightsReserved: 'All rights reserved',
+
   },
 
   fr: {
@@ -620,6 +628,8 @@ const translations = {
     totalTransactions: 'Total des Transactions',
     averageExpense: 'Dépense Moyenne',
     averageIncome: 'Revenu Moyen',
+    showAllCategories: 'plus de catégories',
+    showLess: 'Voir moins',
     
     // Preferences
     preferences: 'Préférences',
@@ -728,7 +738,9 @@ const translations = {
     baseIncomeInfo3: 'Vous pouvez le modifier quand vous voulez',
     placeholderAmount: '2000.00',
     set: 'Définir',
-    update: 'Mettre à jour'
+    update: 'Mettre à jour',
+    
+    allRightsReserved: 'Tous droits réservés',
   },
 
   pt: {
@@ -859,6 +871,8 @@ const translations = {
     totalTransactions: 'Total de Transações',
     averageExpense: 'Gasto Médio',
     averageIncome: 'Renda Média',
+    showAllCategories: 'mais categorias',
+    showLess: 'Mostrar menos',
     
     // Preferences
     preferences: 'Preferências',
@@ -967,7 +981,9 @@ const translations = {
     baseIncomeInfo3: 'Você pode modificar quando quiser',
     placeholderAmount: '2000.00',
     set: 'Definir',
-    update: 'Atualizar'
+    update: 'Atualizar',
+
+    allRightsReserved: 'Todos os direitos reservados',
   },
 
   it: {
@@ -1098,6 +1114,8 @@ const translations = {
     totalTransactions: 'Totale Transazioni',
     averageExpense: 'Spesa Media',
     averageIncome: 'Reddito Medio',
+    showAllCategories: 'altre categorie',
+    showLess: 'Mostra meno',
     
     // Preferences
     preferences: 'Preferenze',
@@ -1206,7 +1224,9 @@ const translations = {
     baseIncomeInfo3: 'Puoi modificarlo quando vuoi',
     placeholderAmount: '2000.00',
     set: 'Imposta',
-    update: 'Aggiorna'
+    update: 'Aggiorna',
+
+    allRightsReserved: 'Tutti i diritti riservati',
   }
 };
 

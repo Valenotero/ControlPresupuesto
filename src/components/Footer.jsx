@@ -30,7 +30,7 @@ function Footer() {
           {/* Derechos reservados */}
           <div className="text-center sm:text-right">
             <p className="text-sm text-gray-600">
-              © 2025 <a href="https://vgwebstudioportfolio.netlify.app/">VGWebStudio.</a> Todos los derechos reservados.
+              © 2025 <a href="https://vgwebstudioportfolio.netlify.app/">VGWebStudio.</a> {t('allRightsReserved')}
             </p>
           </div>
         </div>

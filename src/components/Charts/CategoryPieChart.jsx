@@ -1,85 +1,81 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { useLanguage } from '../../context/LanguageContext';
 import { useCurrency } from '../../context/CurrencyContext';
 
-function CategoryPieChart({ data, title, type = 'expenses' }) {
+function CategoryPieChart({ data, title }) {
   const { t } = useLanguage();
   const { formatCurrency } = useCurrency();
+  const [showAll, setShowAll] = useState(false);
 
+  const MAX_VISIBLE = 3;
+  const sorted = [...data].sort((a, b) => b.value - a.value);
+  const total = sorted.reduce((sum, item) => sum + item.value, 0);
+  const hiddenCount = Math.max(0, sorted.length - MAX_VISIBLE);
+
+  // Datos que dibujamos en el Pie
+  const displayData = showAll || hiddenCount === 0
+    ? sorted
+    : sorted.slice(0, MAX_VISIBLE);
+
+  // Relleno de cada porción (puedes seguir usando entry.color)
+  const COLORS = displayData.map((e, i) => e.color);
+
+  // Tooltip personalizado
   const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-medium text-gray-900">{data.name}</p>
-          <p className="text-sm text-gray-600">
-            {formatCurrency(data.value)}
-          </p>
-          <p className="text-xs text-gray-500">
-            {((data.value / data.total) * 100).toFixed(1)}%
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const CustomLegend = ({ payload }) => {
+    if (!active || !payload?.length) return null;
+    const { name, value } = payload[0].payload;
     return (
-      <ul className="flex flex-wrap gap-2 justify-center mt-4">
-        {payload.map((entry, index) => (
-          <li key={index} className="flex items-center text-sm">
-            <span 
-              className="w-3 h-3 rounded-full mr-2"
-              style={{ backgroundColor: entry.color }}
-            ></span>
-            <span className="text-gray-700 truncate max-w-20">
-              {entry.value}
-            </span>
-          </li>
-        ))}
-      </ul>
-    );
-  };
-
-  // Calcular el total para los porcentajes
-  const total = data.reduce((sum, item) => sum + item.value, 0);
-  const dataWithTotal = data.map(item => ({ ...item, total }));
-
-  if (!data || data.length === 0) {
-    return (
-      <div className="card">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          {title}
-        </h3>
-        <div className="flex items-center justify-center h-64 text-gray-500">
-          <p>{t('noDataAvailable')}</p>
-        </div>
+      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+        <p className="font-medium">{name}</p>
+        <p>{formatCurrency(value)}</p>
+        <p className="text-xs text-gray-500">
+          {((value / total) * 100).toFixed(1)}%
+        </p>
       </div>
     );
-  }
+  };
+
+  // Leyenda propia opcional (puedes conservar tu CustomLegend si quieres)
+  const CustomLegend = ({ payload }) => (
+    <ul className="flex flex-wrap gap-2 justify-center mt-4">
+      {payload.map((entry, i) => (
+        <li key={i} className="flex items-center text-sm">
+          <span
+            className="w-3 h-3 rounded-full mr-2"
+            style={{ backgroundColor: entry.color }}
+          />
+          <span className="truncate max-w-[6rem]">{entry.value}</span>
+        </li>
+      ))}
+    </ul>
+  );
 
   return (
     <div className="card">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        {title}
-      </h3>
-      
+      {title && (
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          {title}
+        </h3>
+      )}
+
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={dataWithTotal}
+              data={displayData}
+              dataKey="value"
+              nameKey="name"
               cx="50%"
               cy="50%"
               innerRadius={60}
               outerRadius={120}
               paddingAngle={2}
-              dataKey="value"
+              labelLine={false}
+              label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
             >
-              {dataWithTotal.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+              {displayData.map((entry, idx) => (
+                <Cell key={entry.name} fill={entry.color} />
               ))}
             </Pie>
             <Tooltip content={<CustomTooltip />} />
@@ -90,33 +86,46 @@ function CategoryPieChart({ data, title, type = 'expenses' }) {
 
       {/* Resumen numérico */}
       <div className="mt-4 pt-4 border-t border-gray-200">
-        <div className="grid grid-cols-1 gap-2">
-          {data.slice(0, 3).map((item, index) => (
-            <div key={index} className="flex items-center justify-between text-sm">
-              <div className="flex items-center">
-                <div 
+        <ul className="grid grid-cols-1 gap-2">
+          {displayData.map((item, idx) => (
+            <li key={idx} className="flex justify-between text-sm">
+              <span className="flex items-center">
+                <span
                   className="w-3 h-3 rounded-full mr-2"
                   style={{ backgroundColor: item.color }}
-                ></div>
-                <span className="text-gray-700">{item.name}</span>
-              </div>
-              <div className="text-right">
-                <span className="font-medium">{formatCurrency(item.value)}</span>
-                <span className="text-gray-500 ml-2">
+                />
+                {item.name}
+              </span>
+              <span className="text-right">
+                {formatCurrency(item.value)}{' '}
+                <span className="text-gray-500">
                   ({((item.value / total) * 100).toFixed(1)}%)
                 </span>
-              </div>
-            </div>
+              </span>
+            </li>
           ))}
-          {data.length > 3 && (
-            <div className="text-xs text-gray-500 text-center mt-2">
-              +{data.length - 3} categorías más
-            </div>
+
+          {!showAll && hiddenCount > 0 && (
+            <li
+              className="text-xs text-gray-500 text-center cursor-pointer hover:text-gray-700"
+              onClick={() => setShowAll(true)}
+            >
+              +{hiddenCount} {t('showAllCategories')}
+            </li>
           )}
-        </div>
+
+          {showAll && hiddenCount > 0 && (
+            <li
+              className="text-xs text-gray-500 text-center cursor-pointer hover:text-gray-700"
+              onClick={() => setShowAll(false)}
+            >
+              {t('showLess')}
+            </li>
+          )}
+        </ul>
       </div>
     </div>
   );
 }
 
-export default CategoryPieChart; 
+export default CategoryPieChart;
