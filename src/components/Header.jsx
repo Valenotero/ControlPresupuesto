@@ -131,7 +131,7 @@ function Header() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg">
-                <img src="/img/logotipo.jpg" alt="Logo" className="h-8 w-8 rounded-lg object-cover" />
+                <img src="./img/logotipo.jpg" alt="Logo" className="h-8 w-8 rounded-lg object-cover" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">{t('appTitle')}</h1>

@@ -12,7 +12,7 @@ function Footer() {
           <div className="flex items-center space-x-3">
             <div className="flex items-center justify-center w-8 h-8 bg-white rounded-full shadow-sm border border-gray-200">
               <img 
-                src="/img/logotipo.jpg" 
+                src="./img/logotipo.jpg" 
                 alt="Logo" 
                 className="h-6 w-6 rounded-full object-cover"
               />
